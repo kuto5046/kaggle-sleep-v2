@@ -77,9 +77,16 @@ rye run python -m run/train.py downsample_rate=2,4,6,8
 ```
 
 
-## Upload Model
+## Upload 
+最初の場合は--newをつける
+upload model
 ```bash
-rye run python tools/upload_dataset.py
+rye run python tools/upload_model.py 
+```
+
+upload script
+```bash
+rye run python tools/upload_code.py
 ```
 
 ## Inference
