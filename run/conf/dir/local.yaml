@@ -1,5 +1,5 @@
-data_dir: /home/kuto/kaggle/kaggle-child-mind-institute-detect-sleep-states/data/child-mind-institute-detect-sleep-states
-processed_dir: /home/kuto/kaggle/kaggle-child-mind-institute-detect-sleep-states/processed_data
-output_dir: /home/kuto/kaggle/kaggle-child-mind-institute-detect-sleep-states/output
-model_dir: /home/kuto/kaggle/kaggle-child-mind-institute-detect-sleep-states/output/train
+data_dir: /home/kuto/kaggle/kaggle-sleep-v2/data/child-mind-institute-detect-sleep-states
+output_dir: /home/kuto/kaggle/kaggle-sleep-v2/output
+processed_dir: /home/kuto/kaggle/kaggle-sleep-v2/output/processed_data
+model_dir: /home/kuto/kaggle/kaggle-sleep-v2/output/train
 sub_dir: ./
