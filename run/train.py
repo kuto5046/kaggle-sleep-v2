@@ -3,6 +3,7 @@ from pathlib import Path
 
 import hydra
 import torch
+from typing import Optional
 from omegaconf import DictConfig
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import (
@@ -53,6 +54,12 @@ def main(cfg: DictConfig):  # type: ignore
         tags=['tubo_code'],
     )
 
+    limit_train_batches: Optional[int] = None
+    # 実験を高速化するために、学習データを減らす
+    if cfg.quick_exp:
+        cfg.epoch = 20
+        limit_train_batches = 0.3
+    
     trainer = Trainer(
         # env
         default_root_dir=Path.cwd(),
@@ -72,6 +79,7 @@ def main(cfg: DictConfig):  # type: ignore
         log_every_n_steps=int(len(datamodule.train_dataloader()) * 0.1),
         sync_batchnorm=True,
         check_val_every_n_epoch=cfg.check_val_every_n_epoch,
+        limit_train_batches=limit_train_batches,
     )
 
     trainer.fit(model, datamodule=datamodule)
