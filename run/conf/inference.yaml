@@ -52,5 +52,7 @@ labels:
 features:
   - "anglez"
   - "enmo"
+  - "anglez_diff"
+  - "enmo_diff"
   - "hour_sin"
   - "hour_cos"
