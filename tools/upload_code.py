@@ -7,39 +7,37 @@ import click
 from kaggle.api.kaggle_api_extended import KaggleApi
 
 
-def copy_files_with_exts(source_dir: Path, dest_dir: Path, exts: list):
+def copy_all_files(source_dirs: Path, dest_dir: Path):
     """
-    source_dir: 探索開始ディレクトリ
-    dest_dir: コピー先のディレクトリ
-    exts: 対象の拡張子のリスト (例: ['.txt', '.jpg'])
+    source_dir: Source directory
+    dest_dir: Destination directory
     """
+    for source_dir in source_dirs:
+        # Search for all file paths in source_dir
+        for source_path in source_dir.rglob('*'):
+            if source_path.is_file():
+                # Calculate the relative path in dest_dir
+                relative_path = source_path.relative_to(source_dir)
+                dest_path = dest_dir / source_dir.name / relative_path
 
-    # source_dirの中での各拡張子と一致するファイルのパスを探索
-    for ext in exts:
-        for source_path in source_dir.rglob(f"*{ext}"):
-            # dest_dir内での相対パスを計算
-            relative_path = source_path.relative_to(source_dir)
-            dest_path = dest_dir / relative_path
+                # Create the destination directory if necessary
+                dest_path.parent.mkdir(parents=True, exist_ok=True)
 
-            # 必要に応じてコピー先ディレクトリを作成
-            dest_path.parent.mkdir(parents=True, exist_ok=True)
+                # Copy the file
+                shutil.copy2(source_path, dest_path)
+                print(f"Copied {source_path} to {dest_path}")
 
-            # ファイルをコピー
-            shutil.copy2(source_path, dest_path)
-            print(f"Copied {source_path} to {dest_path}")
 
 
 @click.command()
-@click.option("--title", "-t", default="CMI-model")
-@click.option("--dir", "-d", type=Path, default="./output/train")
-@click.option("--extentions", "-e", type=list[str], default=["best_model.pth", ".hydra/*.yaml"])
-@click.option("--user_name", "-u", default="tubotubo")
+@click.option("--title", "-t", default="CMI-code")
+@click.option("--dirs", "-d", type=list[Path], default=[Path("./src"), Path('./run')])
+@click.option("--user_name", "-u", default="kuto0633")
 @click.option("--new", "-n", is_flag=True)
 def main(
     title: str,
-    dir: Path,
-    extentions: list[str] = [".pth", ".yaml"],
-    user_name: str = "tubotubo",
+    dirs: list[Path],
+    user_name: str = "kuto0633",
     new: bool = False,
 ):
     """extentionを指定して、dir以下のファイルをzipに圧縮し、kaggleにアップロードする。
@@ -54,8 +52,7 @@ def main(
     tmp_dir = Path("./tmp")
     tmp_dir.mkdir(parents=True, exist_ok=True)
 
-    # 拡張子が.pthのファイルをコピー
-    copy_files_with_exts(dir, tmp_dir, extentions)
+    copy_all_files(dirs, tmp_dir)
 
     # dataset-metadata.jsonを作成
     dataset_metadata: dict[str, Any] = {}
