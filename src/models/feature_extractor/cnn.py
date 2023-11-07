@@ -143,8 +143,8 @@ class CNN1DLSTMFeatureExtractor(nn.Module):
                     nn.init.constant_(m.bias, 0)
 
         self.lstm = nn.LSTM(
-                self.out_size,
-                self.out_size,
+                self.out_chans * self.height,
+                self.out_chans * self.height // 2,
                 num_layers=3,
                 batch_first=True,
                 bidirectional=True,
@@ -166,10 +166,9 @@ class CNN1DLSTMFeatureExtractor(nn.Module):
         img = torch.stack(out, dim=1)  # (batch_size, out_chans, height, time_steps)
         if self.out_size is not None:
             img = self.pool(img)  # (batch_size, out_chans, height, out_size)
-        seq = img.view(img.shape[0], img.shape[-1], -1)  # (batch_size, out_size, out_chans * height)
+        seq = img.view(img.shape[0], -1, self.out_size).transpose(1,2)  # (batch_size, out_size, out_chans * height)
         seq, _ = self.lstm(seq)  # (batch_size, out_size, out_chans * height)
-        img = seq.view(seq.shape[0], seq.shape[1], img.shape[2], img.shape[3]) # (batch_size, out_size, out_chans, height)
-        img = img.permute(0, 2, 3, 1)  # (batch_size, out_chans, height, out_size)
+        img = seq.view(img.shape[0], self.out_size, self.out_chans, self.height).permute(0, 2, 3, 1) # (batch_size, out_chans, height, out_size)
         if self.sigmoid:
             img = img.sigmoid()
         return img
