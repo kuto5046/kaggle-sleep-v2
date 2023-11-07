@@ -20,6 +20,8 @@ SERIES_SCHEMA = {
 FEATURE_NAMES = [
     "anglez",
     "enmo",
+    "anglez_diff",
+    "enmo_diff",
     "hour_sin",
     "hour_cos",
     "month_sin",
@@ -47,6 +49,8 @@ def add_feature(series_df: pl.DataFrame) -> pl.DataFrame:
         *to_coord(pl.col("timestamp").dt.hour(), 24, "hour"),
         *to_coord(pl.col("timestamp").dt.month(), 12, "month"),
         *to_coord(pl.col("timestamp").dt.minute(), 60, "minute"),
+        pl.col('anglez').diff().fill_null(0).alias('anglez_diff'),
+        pl.col('enmo').diff().fill_null(0).alias('enmo_diff'),
     ).select("series_id", *FEATURE_NAMES)
     return series_df
 
