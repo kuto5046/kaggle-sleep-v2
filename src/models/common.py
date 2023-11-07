@@ -7,7 +7,7 @@ from src.models.decoder.lstmdecoder import LSTMDecoder
 from src.models.decoder.mlpdecoder import MLPDecoder
 from src.models.decoder.transformerdecoder import TransformerDecoder
 from src.models.decoder.unet1ddecoder import UNet1DDecoder
-from src.models.feature_extractor.cnn import CNNSpectrogram
+from src.models.feature_extractor.cnn import CNNSpectrogram, CNN1DLSTMFeatureExtractor
 from src.models.feature_extractor.lstm import LSTMFeatureExtractor
 from src.models.feature_extractor.panns import PANNsFeatureExtractor
 from src.models.feature_extractor.spectrogram import SpecFeatureExtractor
@@ -63,6 +63,17 @@ def get_feature_extractor(
             hop_length=cfg.feature_extractor.hop_length,
             win_length=cfg.feature_extractor.win_length,
             out_size=num_timesteps,
+        )
+    elif cfg.feature_extractor.name == "CNN1DLSTMFeatureExtractor":
+        feature_extractor = CNN1DLSTMFeatureExtractor(
+            in_channels=feature_dim,
+            base_filters=cfg.feature_extractor.base_filters,
+            kernel_sizes=cfg.feature_extractor.kernel_sizes,
+            stride=cfg.feature_extractor.stride,
+            sigmoid=cfg.feature_extractor.sigmoid,
+            output_size=num_timesteps,
+            conv=nn.Conv1d,
+            reinit=cfg.feature_extractor.reinit,
         )
     else:
         raise ValueError(f"Invalid feature extractor name: {cfg.feature_extractor.name}")

@@ -19,6 +19,7 @@ defaults:
 
 seed: 42
 exp_name: dummy
+comment: ""
 duration: 5760 # duration * 5 = 秒数
 downsample_rate: 2
 upsample_rate: 1
@@ -62,8 +63,8 @@ labels:
 
 # feature
 features:
-  - "anglez"
-  - "enmo"
+  # - "anglez"
+  # - "enmo"
   - "anglez_diff"
   - "enmo_diff"
   # - "month_sin"
@@ -72,7 +73,30 @@ features:
   - "hour_cos"
   # - "minute_sin"
   # - "minute_cos"
-
+  # - "anglez_smoothed_avg_12"
+  # - "anglez_smoothed_max_12"
+  # - "anglez_smoothed_min_12"
+  # - "anglez_smoothed_std_12"
+  # - "enmo_smoothed_avg_12"
+  # - "enmo_smoothed_max_12"
+  # - "enmo_smoothed_min_12"
+  # - "enmo_smoothed_std_12"
+  # - "anglez_smoothed_avg_60"
+  # - "anglez_smoothed_max_60"
+  # - "anglez_smoothed_min_60"
+  # - "anglez_smoothed_std_60"
+  # - "enmo_smoothed_avg_60"
+  # - "enmo_smoothed_max_60"
+  # - "enmo_smoothed_min_60"
+  # - "enmo_smoothed_std_60"
+  # - "anglez_smoothed_avg_360"
+  # - "anglez_smoothed_max_360"
+  # - "anglez_smoothed_min_360"
+  # - "anglez_smoothed_std_360"
+  # - "enmo_smoothed_avg_360"
+  # - "enmo_smoothed_max_360"
+  # - "enmo_smoothed_min_360"
+  # - "enmo_smoothed_std_360"
 # optimizer
 optimizer:
   lr: 0.0005
