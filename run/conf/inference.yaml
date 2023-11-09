@@ -30,6 +30,9 @@ batch_size: 32
 num_workers: 2
 use_amp: true
 
+# loss
+inbalanced_loss_weight: 1
+
 # augmentation
 augmentation:
   mixup_prob: 0.0
@@ -41,7 +44,7 @@ augmentation:
 post_process:
   score_th: 0.02
   distance: 10
-
+  low_pass_filter_hour: 1 
 # label
 labels:
   - "awake"
@@ -52,7 +55,5 @@ labels:
 features:
   - "anglez"
   - "enmo"
-  - "anglez_diff"
-  - "enmo_diff"
   - "hour_sin"
   - "hour_cos"

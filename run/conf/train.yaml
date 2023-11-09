@@ -58,7 +58,7 @@ augmentation:
 post_process:
   score_th: 0.02
   distance: 10
-  low_pass_filter_hour: 1 
+  low_pass_filter_hour: 1
 
 # label
 labels:
