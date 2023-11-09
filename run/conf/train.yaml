@@ -71,6 +71,9 @@ features:
   - "enmo"
   - "hour_sin"
   - "hour_cos"
+  - "anglez_yesterday"
+  - "enmo_yesterday"
+
 # optimizer
 optimizer:
   lr: 0.0005
