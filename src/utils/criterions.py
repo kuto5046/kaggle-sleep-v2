@@ -38,9 +38,9 @@ class DiceLoss(nn.Module):
 
     def forward(self, logits, targets):
         probs = logits.sigmoid()
-        num = targets.size(0)
-        m1 = probs.view(num, -1)
-        m2 = targets.view(num, -1)
+        batch_size = targets.size(0)
+        m1 = probs.view(batch_size, -1)
+        m2 = targets.view(batch_size, -1)
         intersection = (m1 * m2).sum()
         union = m1.sum() + m2.sum()
         return 1 - ((2.0 * intersection + 1) / (union + 1))
