@@ -12,7 +12,7 @@ from torch.utils.data import Dataset
 from torchvision.transforms.functional import resize
 
 from src.utils.common import pad_if_needed
-
+from src.augmentation.local_shuffle import LocalShuffleAug
 
 ###################
 # Load Functions
@@ -170,6 +170,8 @@ class TrainDataset(Dataset):
             int(self.cfg.duration * self.cfg.upsample_rate), self.cfg.downsample_rate
         )
 
+        self.local_shuffle_aug = LocalShuffleAug(self.cfg.augmentation.local_shuffle_window_size)
+
     def __len__(self):
         return len(self.event_df)
 
@@ -191,6 +193,10 @@ class TrainDataset(Dataset):
         start, end = random_crop(pos, self.cfg.duration, n_steps)
         feature = this_feature[start:end]  # (duration, num_features)
 
+        # shuffle aug
+        if random.random() < self.cfg.augmentation.local_shuffle_prob:
+            feature = self.local_shuffle_aug(feature)
+
         # upsample
         feature = torch.FloatTensor(feature.T).unsqueeze(0)  # (1, num_features, duration)
         feature = resize(
@@ -205,7 +211,7 @@ class TrainDataset(Dataset):
         label[:, [1, 2]] = gaussian_label(
             label[:, [1, 2]], offset=self.cfg.offset, sigma=self.cfg.sigma
         )
-
+ 
         return {
             "series_id": series_id,
             "feature": feature,  # (num_features, upsampled_num_frames)
@@ -298,6 +304,51 @@ class TestDataset(Dataset):
         }
 
 
+def drop_data(labels: pl.DataFrame):
+    # Getting series ids as a list for convenience
+    series_ids = labels["series_id"].unique(maintain_order=True).to_list()
+
+    # Removing series with mismatched counts:
+    onset_counts = (
+        labels.filter(pl.col("event") == "onset")
+        .group_by("series_id")
+        .count()
+        .sort("series_id")["count"]
+    )
+    wakeup_counts = (
+        labels.filter(pl.col("event") == "wakeup")
+        .group_by("series_id")
+        .count()
+        .sort("series_id")["count"]
+    )
+
+    counts = pl.DataFrame(
+        {
+            "series_id": sorted(series_ids),
+            "onset_counts": onset_counts,
+            "wakeup_counts": wakeup_counts,
+        }
+    )
+    count_mismatches = counts.filter(
+        counts["onset_counts"] != counts["wakeup_counts"]
+    )
+    event_mismatch_series_ids = count_mismatches["series_id"].to_list()
+    drop_event_ids = (
+        labels.filter(pl.col("series_id").is_in(event_mismatch_series_ids))
+        .group_by(["series_id", "night"])
+        .count()
+        .filter(pl.col("count") != 2)
+    )
+    # target_eventsからdrop_event_idsのseries_idとnightの組み合わせを除外
+    for series_id, night in drop_event_ids[["series_id", "night"]].to_numpy():
+        labels = labels.filter(
+            ~((pl.col("series_id") == series_id) & (pl.col("night") == night))
+        )
+
+    # stepには欠損があったことでtrainとlabelsで型が異なるのでu32に変換する
+    return labels
+
+
 ###################
 # DataModule
 ###################
@@ -308,6 +359,7 @@ class SegDataModule(LightningDataModule):
         self.data_dir = Path(cfg.dir.data_dir)
         self.processed_dir = Path(cfg.dir.processed_dir)
         self.event_df = pl.read_csv(self.data_dir / "train_events.csv").drop_nulls()
+        self.event_df = drop_data(self.event_df)
         self.train_event_df = self.event_df.filter(
             pl.col("series_id").is_in(self.cfg.split.train_series_ids)
         )

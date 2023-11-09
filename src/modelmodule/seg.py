@@ -36,7 +36,7 @@ class SegModel(LightningModule):
         )
         self.duration = duration
         self.validation_step_outputs: list = []
-        self.__best_loss = np.inf
+        self.__best_score = 0
 
     def forward(
         self, x: torch.Tensor, labels: Optional[torch.Tensor] = None
@@ -61,16 +61,7 @@ class SegModel(LightningModule):
         loss: torch.Tensor = output["loss"]
         logits = output["logits"]  # (batch_size, n_timesteps, n_classes)
 
-        if mode == "train":
-            self.log(
-                f"{mode}_loss",
-                loss.detach().item(),
-                on_step=False,
-                on_epoch=True,
-                logger=True,
-                prog_bar=True,
-            )
-        elif mode == "val":
+        if mode == "val":
             resized_logits = resize(
                 logits.sigmoid().detach().cpu(),
                 size=[self.duration, logits.shape[2]],
@@ -89,14 +80,14 @@ class SegModel(LightningModule):
                     loss.detach().item(),
                 )
             )
-            self.log(
-                f"{mode}_loss",
-                loss.detach().item(),
-                on_step=False,
-                on_epoch=True,
-                logger=True,
-                prog_bar=True,
-            )
+        self.log(
+            f"{mode}_loss",
+            loss.detach().item(),
+            on_step=False,
+            on_epoch=True,
+            logger=True,
+            prog_bar=True,
+        )
 
         return loss
 
@@ -118,14 +109,14 @@ class SegModel(LightningModule):
         score = event_detection_ap(self.val_event_df.to_pandas(), val_pred_df.to_pandas())
         self.log("val_score", score, on_step=False, on_epoch=True, logger=True, prog_bar=True)
 
-        if loss < self.__best_loss:
+        if score > self.__best_score:
             np.save("keys.npy", np.array(keys))
             np.save("labels.npy", labels)
             np.save("preds.npy", preds)
             val_pred_df.write_csv("val_pred_df.csv")
             torch.save(self.model.state_dict(), "best_model.pth")
-            print(f"Saved best model {self.__best_loss} -> {loss}")
-            self.__best_loss = loss
+            print(f"Saved best model {self.__best_score} -> {score}")
+            self.__best_score = score
 
         self.validation_step_outputs.clear()
 

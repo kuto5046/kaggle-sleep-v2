@@ -79,10 +79,6 @@ def main(cfg: DictConfig):  # type: ignore
     )
 
     limit_train_batches: Optional[int] = None
-    # 実験を高速化するために、学習データを減らす
-    if cfg.quick_exp:
-        cfg.epoch = 20
-        limit_train_batches = 0.3
     
     trainer = Trainer(
         # env

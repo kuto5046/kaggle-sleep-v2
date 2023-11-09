@@ -28,30 +28,30 @@ FEATURE_NAMES = [
     "month_cos",
     "minute_sin",
     "minute_cos",
-    "anglez_smoothed_avg_12",
-    "anglez_smoothed_max_12",
-    "anglez_smoothed_min_12",
-    "anglez_smoothed_std_12",
-    "enmo_smoothed_avg_12",
-    "enmo_smoothed_max_12",
-    "enmo_smoothed_min_12",
-    "enmo_smoothed_std_12",
-    "anglez_smoothed_avg_60",
-    "anglez_smoothed_max_60",
-    "anglez_smoothed_min_60",
-    "anglez_smoothed_std_60",
-    "enmo_smoothed_avg_60",
-    "enmo_smoothed_max_60",
-    "enmo_smoothed_min_60",
-    "enmo_smoothed_std_60",
-    "anglez_smoothed_avg_360",
-    "anglez_smoothed_max_360",
-    "anglez_smoothed_min_360",
-    "anglez_smoothed_std_360",
-    "enmo_smoothed_avg_360",
-    "enmo_smoothed_max_360",
-    "enmo_smoothed_min_360",
-    "enmo_smoothed_std_360",
+    # "anglez_smoothed_avg_12",
+    # "anglez_smoothed_max_12",
+    # "anglez_smoothed_min_12",
+    # "anglez_smoothed_std_12",
+    # "enmo_smoothed_avg_12",
+    # "enmo_smoothed_max_12",
+    # "enmo_smoothed_min_12",
+    # "enmo_smoothed_std_12",
+    # "anglez_smoothed_avg_60",
+    # "anglez_smoothed_max_60",
+    # "anglez_smoothed_min_60",
+    # "anglez_smoothed_std_60",
+    # "enmo_smoothed_avg_60",
+    # "enmo_smoothed_max_60",
+    # "enmo_smoothed_min_60",
+    # "enmo_smoothed_std_60",
+    # "anglez_smoothed_avg_360",
+    # "anglez_smoothed_max_360",
+    # "anglez_smoothed_min_360",
+    # "anglez_smoothed_std_360",
+    # "enmo_smoothed_avg_360",
+    # "enmo_smoothed_max_360",
+    # "enmo_smoothed_min_360",
+    # "enmo_smoothed_std_360",
 ]
 
 ANGLEZ_MEAN = -8.810476
@@ -76,19 +76,6 @@ def add_feature(series_df: pl.DataFrame) -> pl.DataFrame:
         pl.col('anglez').diff().fill_null(0).alias('anglez_diff'),
         pl.col('enmo').diff().fill_null(0).alias('enmo_diff'),
     )
-    for col in ['anglez', 'enmo']:
-        # 移動平均系
-        for window_min in [1, 5, 30]: # , 60, 60*3, 60*8, 60*24]:  # 30s, 1min, 2min, 5min, 10min, 30min
-            # これを実行する前にsamplingされている場合はwindow_size計算時にsampling_stepを考慮する必要がある
-            window_size = int((window_min * 60) // 5)
-            series_df = series_df.with_columns(
-                # moving stats
-                pl.col(col).rolling_mean(window_size, center=True).fill_null(strategy='forward').fill_null(strategy='backward').alias(f'{col}_smoothed_avg_{window_size}'),
-                pl.col(col).rolling_max(window_size, center=True).fill_null(strategy='forward').fill_null(strategy='backward').alias(f'{col}_smoothed_max_{window_size}'),
-                pl.col(col).rolling_min(window_size, center=True).fill_null(strategy='forward').fill_null(strategy='backward').alias(f'{col}_smoothed_min_{window_size}'),
-                pl.col(col).rolling_std(window_size, center=True).fill_null(strategy='forward').fill_null(strategy='backward').alias(f'{col}_smoothed_std_{window_size}'),
-            )
-
     series_df = series_df.select("series_id", *FEATURE_NAMES)
     return series_df
 
