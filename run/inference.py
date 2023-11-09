@@ -11,7 +11,9 @@ from torch.utils.data import DataLoader
 from torchvision.transforms.functional import resize
 from tqdm import tqdm
 
-from src.datamodule.seg import TestDataset, load_chunk_features, nearest_valid_size
+from src.datamodule.seg import TestDataset
+from src.datamodule.seg import load_chunk_features
+from src.datamodule.seg import nearest_valid_size
 from src.models.common import get_model
 from src.utils.common import trace
 from src.utils.post_process import post_process_for_seg
@@ -97,13 +99,14 @@ def inference(
 
 
 def make_submission(
-    keys: list[str], preds: np.ndarray, downsample_rate, score_th, distance
+    keys: list[str], preds: np.ndarray, downsample_rate, score_th, distance, low_pass_filter_hour
 ) -> pl.DataFrame:
     sub_df = post_process_for_seg(
         keys,
         preds[:, :, [1, 2]],  # type: ignore
         score_th=score_th,
         distance=distance,  # type: ignore
+        low_pass_filter_hour=low_pass_filter_hour,
     )
 
     return sub_df
@@ -129,6 +132,7 @@ def main(cfg: DictConfig):
             downsample_rate=cfg.downsample_rate,
             score_th=cfg.post_process.score_th,
             distance=cfg.post_process.distance,
+            low_pass_filter_hour=cfg.post_process.low_pass_filter_hour,
         )
     sub_df.write_csv(Path(cfg.dir.sub_dir) / "submission.csv")
 

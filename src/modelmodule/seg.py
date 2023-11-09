@@ -97,14 +97,15 @@ class SegModel(LightningModule):
             keys.extend(x[0])
         labels = np.concatenate([x[1] for x in self.validation_step_outputs])
         preds = np.concatenate([x[2] for x in self.validation_step_outputs])
-        losses = np.array([x[3] for x in self.validation_step_outputs])
-        loss = losses.mean()
+        # losses = np.array([x[3] for x in self.validation_step_outputs])
+        # loss = losses.mean()
 
         val_pred_df = post_process_for_seg(
             keys=keys,
             preds=preds[:, :, [1, 2]],
             score_th=self.cfg.post_process.score_th,
             distance=self.cfg.post_process.distance,
+            low_pass_filter_hour=self.cfg.post_process.low_pass_filter_hour,
         )
         score = event_detection_ap(self.val_event_df.to_pandas(), val_pred_df.to_pandas())
         self.log("val_score", score, on_step=False, on_epoch=True, logger=True, prog_bar=True)

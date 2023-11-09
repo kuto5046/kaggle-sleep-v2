@@ -1,32 +1,32 @@
 import logging
 from pathlib import Path
+from typing import Optional
 
 import hydra
+import numpy as np
+import pandas as pd
+import polars as pl
 import torch
-from typing import Optional
+import wandb
 from omegaconf import DictConfig
-from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.callbacks import (
-    LearningRateMonitor,
-    ModelCheckpoint,
-    RichModelSummary,
-    RichProgressBar,
-)
+from pytorch_lightning import Trainer
+from pytorch_lightning import seed_everything
+from pytorch_lightning.callbacks import LearningRateMonitor
+from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import RichModelSummary
+from pytorch_lightning.callbacks import RichProgressBar
 from pytorch_lightning.loggers import WandbLogger
-from pytorch_lightning import LightningDataModule, LightningModule
+
 from src.datamodule.seg import SegDataModule
 from src.modelmodule.seg import SegModel
 from src.utils.metrics import event_detection_ap
 from src.utils.post_process import post_process_for_seg
-import wandb 
-import numpy as np
-import pandas as pd
-import polars as pl
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s:%(name)s - %(message)s"
 )
 LOGGER = logging.getLogger(Path(__file__).name)
+
 
 def evaluate(cfg: DictConfig):
     """
@@ -37,10 +37,16 @@ def evaluate(cfg: DictConfig):
     keys = np.load("keys.npy")
 
     gt_df = pd.read_csv(Path(cfg.dir.data_dir) / "train_events.csv")
-    gt_df = gt_df[gt_df["series_id"].isin(cfg.split.valid_series_ids)].dropna().reset_index(drop=True)
+    gt_df = (
+        gt_df[gt_df["series_id"].isin(cfg.split.valid_series_ids)].dropna().reset_index(drop=True)
+    )
 
     pred_df: pl.DataFrame = post_process_for_seg(
-        keys, preds[:, :, [1, 2]], score_th=cfg.post_process.score_th, distance=cfg.post_process.distance
+        keys,
+        preds[:, :, [1, 2]],
+        score_th=cfg.post_process.score_th,
+        distance=cfg.post_process.distance,
+        low_pass_filter_hour=cfg.post_process.low_pass_filter_hour,
     )
     score = event_detection_ap(gt_df, pred_df.to_pandas())
     wandb.log({"score": score})
@@ -74,12 +80,12 @@ def main(cfg: DictConfig):  # type: ignore
         project="kaggle-sleep",
         entity="kuto5046",
         group=cfg.exp_name,
-        tags=['tubo_code'],
+        tags=["tubo_code"],
         mode="disabled" if cfg.debug else "online",
     )
 
     limit_train_batches: Optional[int] = None
-    
+
     trainer = Trainer(
         # env
         default_root_dir=Path.cwd(),
