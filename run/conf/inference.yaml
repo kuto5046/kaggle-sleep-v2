@@ -21,6 +21,7 @@ phase: test
 weight:
   exp_name: ${exp_name}
   run_name: single
+  model_name: "best_model.pth"  # or "latest_model.pth"
 
 seed: 42
 duration: 5760 # durationは32の倍数

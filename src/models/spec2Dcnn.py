@@ -6,8 +6,8 @@ import torch.nn as nn
 
 from src.augmentation.cutmix import Cutmix
 from src.augmentation.mixup import Mixup
-from src.augmentation.local_shuffle import LocalShuffleAug
-from src.criterions import InbalancedMSELoss
+from src.utils.criterions import InbalancedMSELoss
+
 
 class Spec2DCNN(nn.Module):
     def __init__(
@@ -63,7 +63,9 @@ class Spec2DCNN(nn.Module):
         output = {"logits": logits}
         if labels is not None:
             loss1 = self.loss_fn1(logits, labels)
-            loss2 = self.loss_fn2(logits[:, :, 0].sigmoid().diff(dim=1), labels[:, :, 0].diff(dim=1))
+            loss2 = self.loss_fn2(
+                logits[:, :, 0].sigmoid().diff(dim=1), labels[:, :, 0].diff(dim=1)
+            )
             output["loss"] = loss1 + loss2
 
         return output

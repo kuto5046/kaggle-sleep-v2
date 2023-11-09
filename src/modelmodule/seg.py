@@ -91,6 +91,10 @@ class SegModel(LightningModule):
 
         return loss
 
+    def on_train_epoch_end(self) -> None:
+        # 一番最新のepochのモデルを保存
+        torch.save(self.model.state_dict(), "latest_model.pth")
+
     def on_validation_epoch_end(self):
         keys = []
         for x in self.validation_step_outputs:

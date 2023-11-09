@@ -108,8 +108,14 @@ def main(cfg: DictConfig):  # type: ignore
         limit_train_batches=limit_train_batches,
     )
 
-    trainer.fit(model, datamodule=datamodule)
+    all_training = len(cfg.split.valid_series_ids) == 0
+    if all_training:
+        trainer.fit(model, train_dataloaders=datamodule.train_dataloader())
+    else:
+        trainer.fit(model, datamodule=datamodule)
 
+    if all_training:
+        return
     # load best weights
     if not cfg.debug:
         model = model.load_from_checkpoint(
@@ -120,6 +126,7 @@ def main(cfg: DictConfig):  # type: ignore
             num_classes=len(cfg.labels),
             duration=cfg.duration,
         )
+
     evaluate(cfg)
     weights_path = str("model_weights.pth")  # type: ignore
     LOGGER.info(f"Extracting and saving best weights: {weights_path}")
