@@ -214,7 +214,9 @@ class TrainDataset(Dataset):
             swap_pos = this_event_df[event].sample(1).to_numpy()[0]
             swap_start, swap_end = random_crop(swap_pos, self.cfg.duration, n_steps)
             swap_feature = this_feature[swap_start:swap_end]  # (duration, num_features)
-            swap_label = get_label(this_event_df, num_frames, self.cfg.duration, start, end)
+            swap_label = get_label(
+                this_event_df, num_frames, self.cfg.duration, swap_start, swap_end
+            )
             swap_label[:, [1, 2]] = gaussian_label(
                 swap_label[:, [1, 2]], offset=self.cfg.offset, sigma=self.cfg.sigma
             )

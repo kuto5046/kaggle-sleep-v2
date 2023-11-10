@@ -40,6 +40,15 @@ class SwapEvent:
 
         idx = idxes[0]
         swap_idx = swap_idxes[0]
+        if (
+            (idx - self.window_size < 0)
+            or (swap_idx - self.window_size < 0)
+            or (idx + self.window_size >= len(feature))
+            or (swap_idx + self.window_size >= len(swap_feature))
+            or (idx - self.window_size >= len(feature))
+            or (swap_idx - self.window_size >= len(swap_feature))
+        ):
+            return feature
         feature[
             idx - self.window_size : idx + self.window_size, self.swap_channels
         ] = swap_feature[
