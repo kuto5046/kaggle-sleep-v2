@@ -11,8 +11,10 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset
 from torchvision.transforms.functional import resize
 
-from src.utils.common import pad_if_needed
 from src.augmentation.local_shuffle import LocalShuffleAug
+from src.augmentation.swap_event import SwapEvent
+from src.utils.common import pad_if_needed
+
 
 ###################
 # Load Functions
@@ -171,15 +173,19 @@ class TrainDataset(Dataset):
         )
 
         self.local_shuffle_aug = LocalShuffleAug(self.cfg.augmentation.local_shuffle_window_size)
+        self.swap_event_aug = SwapEvent(
+            self.cfg.augmentation.swap_event_window_size, self.cfg.augmentation.swap_channels
+        )
 
     def __len__(self):
         return len(self.event_df)
 
     def __getitem__(self, idx):
+        num_frames = self.upsampled_num_frames // self.cfg.downsample_rate
+
         event = np.random.choice(["onset", "wakeup"], p=[0.5, 0.5])
         pos = self.event_df.at[idx, event]
         series_id = self.event_df.at[idx, "series_id"]
-        self.event_df["series_id"]
         this_event_df = self.event_df.query("series_id == @series_id").reset_index(drop=True)
         # extract data matching series_id
         this_feature = self.features[series_id]  # (n_steps, num_features)
@@ -197,6 +203,23 @@ class TrainDataset(Dataset):
         if random.random() < self.cfg.augmentation.local_shuffle_prob:
             feature = self.local_shuffle_aug(feature)
 
+        # from hard label to gaussian label
+        label = get_label(this_event_df, num_frames, self.cfg.duration, start, end)
+        label[:, [1, 2]] = gaussian_label(
+            label[:, [1, 2]], offset=self.cfg.offset, sigma=self.cfg.sigma
+        )
+
+        if random.random() < self.cfg.augmentation.swap_event_prob:
+            # 同一series_idの同一eventからランダムに1箇所をサンプリング
+            swap_pos = this_event_df[event].sample(1).to_numpy()[0]
+            swap_start, swap_end = random_crop(swap_pos, self.cfg.duration, n_steps)
+            swap_feature = this_feature[swap_start:swap_end]  # (duration, num_features)
+            swap_label = get_label(this_event_df, num_frames, self.cfg.duration, start, end)
+            swap_label[:, [1, 2]] = gaussian_label(
+                swap_label[:, [1, 2]], offset=self.cfg.offset, sigma=self.cfg.sigma
+            )
+            feature = self.swap_event_aug(feature, label, swap_feature, swap_label, event)
+
         # upsample
         feature = torch.FloatTensor(feature.T).unsqueeze(0)  # (1, num_features, duration)
         feature = resize(
@@ -205,13 +228,6 @@ class TrainDataset(Dataset):
             antialias=False,
         ).squeeze(0)
 
-        # from hard label to gaussian label
-        num_frames = self.upsampled_num_frames // self.cfg.downsample_rate
-        label = get_label(this_event_df, num_frames, self.cfg.duration, start, end)
-        label[:, [1, 2]] = gaussian_label(
-            label[:, [1, 2]], offset=self.cfg.offset, sigma=self.cfg.sigma
-        )
- 
         return {
             "series_id": series_id,
             "feature": feature,  # (num_features, upsampled_num_frames)
@@ -329,9 +345,7 @@ def drop_data(labels: pl.DataFrame):
             "wakeup_counts": wakeup_counts,
         }
     )
-    count_mismatches = counts.filter(
-        counts["onset_counts"] != counts["wakeup_counts"]
-    )
+    count_mismatches = counts.filter(counts["onset_counts"] != counts["wakeup_counts"])
     event_mismatch_series_ids = count_mismatches["series_id"].to_list()
     drop_event_ids = (
         labels.filter(pl.col("series_id").is_in(event_mismatch_series_ids))
@@ -341,9 +355,7 @@ def drop_data(labels: pl.DataFrame):
     )
     # target_eventsからdrop_event_idsのseries_idとnightの組み合わせを除外
     for series_id, night in drop_event_ids[["series_id", "night"]].to_numpy():
-        labels = labels.filter(
-            ~((pl.col("series_id") == series_id) & (pl.col("night") == night))
-        )
+        labels = labels.filter(~((pl.col("series_id") == series_id) & (pl.col("night") == night)))
 
     # stepには欠損があったことでtrainとlabelsで型が異なるのでu32に変換する
     return labels
