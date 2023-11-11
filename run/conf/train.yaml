@@ -19,7 +19,7 @@ defaults:
 
 seed: 42
 exp_name: dummy
-comment: ""
+notes: ""
 duration: 5760 # duration * 5 = 秒数
 downsample_rate: 2
 upsample_rate: 1

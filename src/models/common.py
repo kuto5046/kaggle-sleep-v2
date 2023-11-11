@@ -3,11 +3,14 @@ from typing import Union
 import torch.nn as nn
 from omegaconf import DictConfig
 
+from src.models.decoder.lstmdecoder import CNN1DLSTMDecoder
 from src.models.decoder.lstmdecoder import LSTMDecoder
 from src.models.decoder.mlpdecoder import MLPDecoder
+from src.models.decoder.transformerdecoder import CNN1DTransformerDecoder
 from src.models.decoder.transformerdecoder import TransformerDecoder
 from src.models.decoder.unet1ddecoder import UNet1DDecoder
-from src.models.feature_extractor.cnn import CNNSpectrogram, CNN1DLSTMFeatureExtractor
+from src.models.feature_extractor.cnn import CNN1DLSTMFeatureExtractor
+from src.models.feature_extractor.cnn import CNNSpectrogram
 from src.models.feature_extractor.lstm import LSTMFeatureExtractor
 from src.models.feature_extractor.panns import PANNsFeatureExtractor
 from src.models.feature_extractor.spectrogram import SpecFeatureExtractor
@@ -103,8 +106,26 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
             bidirectional=cfg.decoder.bidirectional,
             n_classes=n_classes,
         )
+    elif cfg.decoder.name == "CNN1DLSTMDecoder":
+        decoder = CNN1DLSTMDecoder(
+            input_size=n_channels,
+            hidden_size=cfg.decoder.hidden_size,
+            num_layers=cfg.decoder.num_layers,
+            dropout=cfg.decoder.dropout,
+            bidirectional=cfg.decoder.bidirectional,
+            n_classes=n_classes,
+        )
     elif cfg.decoder.name == "TransformerDecoder":
         decoder = TransformerDecoder(
+            input_size=n_channels,
+            hidden_size=cfg.decoder.hidden_size,
+            num_layers=cfg.decoder.num_layers,
+            dropout=cfg.decoder.dropout,
+            nhead=cfg.decoder.nhead,
+            n_classes=n_classes,
+        )
+    elif cfg.decoder.name == "CNN1DTransformerDecoder":
+        decoder = CNN1DTransformerDecoder(
             input_size=n_channels,
             hidden_size=cfg.decoder.hidden_size,
             num_layers=cfg.decoder.num_layers,
@@ -137,7 +158,9 @@ def get_model(cfg: DictConfig, feature_dim: int, n_classes: int, num_timesteps: 
         )
     elif cfg.model.name == "Spec1D":
         feature_extractor = get_feature_extractor(cfg, feature_dim, num_timesteps)
-        decoder = get_decoder(cfg, feature_extractor.height, n_classes, num_timesteps)
+        decoder = get_decoder(
+            cfg, feature_extractor.height * feature_extractor.out_chans, n_classes, num_timesteps
+        )
         model = Spec1D(
             feature_extractor=feature_extractor,
             decoder=decoder,

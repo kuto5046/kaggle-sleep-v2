@@ -82,6 +82,7 @@ def main(cfg: DictConfig):  # type: ignore
         group=cfg.exp_name,
         tags=["tubo_code"],
         mode="disabled" if cfg.debug else "online",
+        notes=cfg.notes,
     )
 
     limit_train_batches: Optional[int] = None
@@ -131,7 +132,6 @@ def main(cfg: DictConfig):  # type: ignore
     weights_path = str("model_weights.pth")  # type: ignore
     LOGGER.info(f"Extracting and saving best weights: {weights_path}")
     torch.save(model.model.state_dict(), weights_path)
-    wandb.finish()  # multirunの時に同一のrun扱いになるのを防ぐ
     return
 
 

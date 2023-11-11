@@ -45,10 +45,10 @@ class Spec1D(nn.Module):
         if do_cutmix and labels is not None:
             x, labels = self.cutmix(x, labels)
 
-        # pool over n_channels dimension
-        x = x.transpose(1, 3)  # (batch_size, n_timesteps, height, n_channels)
-        x = self.channels_fc(x)  # (batch_size, n_timesteps, height, 1)
-        x = x.squeeze(-1).transpose(1, 2)  # (batch_size, height, n_timesteps)
+        # n_channelとheightを結合
+        batch_size = x.shape[0]
+        n_timesteps = x.shape[-1]
+        x = x.view(batch_size, -1, n_timesteps)  # (batch_size, n_channels*height, n_timesteps
         logits = self.decoder(x)  # (batch_size, n_classes, n_timesteps)
 
         output = {"logits": logits}
