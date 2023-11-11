@@ -6,6 +6,14 @@ from typing import Any
 import click
 from kaggle.api.kaggle_api_extended import KaggleApi
 
+TARGET_EXP_NAMES = [
+    # "exp064",
+    "exp070",
+    # "exp073",
+    # "exp075",
+    "exp077",
+]
+
 
 def copy_files_with_exts(source_dir: Path, dest_dir: Path, exts: list):
     """
@@ -19,6 +27,10 @@ def copy_files_with_exts(source_dir: Path, dest_dir: Path, exts: list):
         for source_path in source_dir.rglob(f"*{ext}"):
             # dest_dir内での相対パスを計算
             relative_path = source_path.relative_to(source_dir)
+            exp_name = str(relative_path).split("/")[0]
+            if exp_name not in TARGET_EXP_NAMES:
+                continue
+
             dest_path = dest_dir / relative_path
 
             # 必要に応じてコピー先ディレクトリを作成
@@ -36,7 +48,11 @@ def copy_files_with_exts(source_dir: Path, dest_dir: Path, exts: list):
     "--extentions",
     "-e",
     type=list[str],
-    default=["best_model.pth", "latest_model.pth", ".hydra/*.yaml"],
+    default=[
+        "best_model.pth",
+        # "latest_model.pth",
+        ".hydra/*.yaml",
+    ],
 )
 @click.option("--user_name", "-u", default="kuto0633")
 @click.option("--new", "-n", is_flag=True)

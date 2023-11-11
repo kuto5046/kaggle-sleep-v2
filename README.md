@@ -73,7 +73,7 @@ You can easily perform experiments by changing the parameters because [hydra](ht
 The following commands perform experiments with downsample_rate of 2, 4, 6, and 8.
 
 ```bash
-rye run python -m run/train.py downsample_rate=2,4,6,8
+rye run python run/train.py hydra.mode=MULTIRUN downsample_rate=2,4,6,8
 ```
 
 
