@@ -1,0 +1,5 @@
+name: CNN1DLSTMDecoder
+hidden_size: 256
+num_layers: 4
+dropout: 0.2
+bidirectional: true
