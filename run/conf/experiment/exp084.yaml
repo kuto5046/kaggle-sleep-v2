@@ -1,0 +1,16 @@
+# @package _global_
+exp_name: exp084
+notes: "1DCNNのscore上がった施策を2DCNNに適用してscoreが上がるか"
+epoch: 50
+duration: 17280
+downsample_rate: 4
+
+feature_extractor:
+  kernel_sizes:
+    - 128
+    - 64
+    - 32
+    - 16
+    - 8
+    - 4
+    - 2

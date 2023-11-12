@@ -1,0 +1,21 @@
+# @package _global_
+defaults:
+  - override /model: Spec1D
+  - override /decoder: CNN1DLSTMDecoder
+
+exp_name: exp083
+notes: "batch_size増やす 前の実験だとLSTMの場合大きい方が良かったので"
+epoch: 30
+duration: 17280
+downsample_rate: 4
+batch_size: 32
+
+feature_extractor:
+  kernel_sizes:
+    - 128
+    - 64
+    - 32
+    - 16
+    - 8
+    - 4
+    - 2
