@@ -4,17 +4,17 @@ hydra:
     name: inference
     chdir: true
   run:
-    dir: ${dir.output_dir}/${hydra.job.name}/${exp_name}/single
+    dir: ${dir.output_dir}/${hydra.job.name}/${exp_name}/${weight.run_name}
   sweep:
     dir: ${dir.output_dir}/${hydra.job.name}/${exp_name}
     subdir: run${hydra.job.num}
 
 defaults:
-  - _self_
   - dir: local
   - model: Spec2DCNN
   - feature_extractor: CNNSpectrogram
   - decoder: UNet1DDecoder
+  - _self_
 
 exp_name: dummy
 phase: test
@@ -22,6 +22,9 @@ weight:
   exp_name: ${exp_name}
   run_name: single
   model_name: "best_model.pth"  # or "latest_model.pth"
+
+model:
+  encoder_weights: null
 
 seed: 42
 duration: 5760 # durationは32の倍数

@@ -124,6 +124,8 @@ def main(cfg: DictConfig):
 
     with trace("inference"):
         keys, preds = inference(cfg.duration, test_dataloader, model, device, use_amp=cfg.use_amp)
+        np.save("keys.npy", np.array(keys))
+        np.save("preds.npy", preds)
 
     with trace("make submission"):
         sub_df = make_submission(

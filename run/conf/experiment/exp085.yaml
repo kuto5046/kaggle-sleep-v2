@@ -1,5 +1,3 @@
 # @package _global_
-defaults:
-  - override /split: fold_0
 exp_name: exp085
 notes: "現状ベストでfoldを全て用意"

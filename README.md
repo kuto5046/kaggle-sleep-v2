@@ -76,6 +76,23 @@ The following commands perform experiments with downsample_rate of 2, 4, 6, and 
 rye run python run/train.py hydra.mode=MULTIRUN downsample_rate=2,4,6,8
 ```
 
+複数foldを学習させるとき
+```bash
+python run/train.py hydra.mode=MULTIRUN +experiment=exp001 split=fold_0,fold_1,fold_2,fold_3,fold_4
+```
+
+hydra memo
+
+experimentフォルダにexp001.yamlをtrain.yamlの差分のみ記載しておくと以下のように実行できる
+```bash
+python run/train.py +experiment=exp001
+```
+
+multirunで複数のlist形式のパラメータを指定する場合は以下のように文字列で指定する
+```bash
+python run/train.py hydra.mode=MULTIRUN +experiment=exp001 'downsample_rate=[2,4,6,8],[2,4]'
+```
+
 
 ## Upload 
 最初の場合は--newをつける
@@ -95,14 +112,11 @@ The following commands are for inference of LB0.714
 rye run python run/inference.py dir=kaggle exp_name=exp001 weight.run_name=single downsample_rate=2 duration=5760 model.encoder_weights=null post_process.score_th=0.005 post_process.distance=40 phase=test
 ```
 
-multi runに関するメモ
-
-experimentフォルダにexp001.yamlをtrain.yamlの差分のみ記載しておくと以下のように実行できる
+複数foldで推論するとき
+multirunを使うとモデルの読み込みがちょっと面倒なので個別で実行する
 ```bash
-python run/train.py +experiment=exp001
+python run/inference.py +experiment=exp001 weight.run_name=run0
+python run/inference.py +experiment=exp001 weight.run_name=run1
 ```
 
-multirunで複数のlist形式のパラメータを指定する場合は以下のように文字列で指定する
-```bash
-python run/train.py hydra.mode=MULTIRUN +experiment=exp001 'downsample_rate=[2,4,6,8],[2,4]'
-```
+アンサンブルやスタッキングをする場合は上記の方法で個別の予測値を作成しそれを利用する
