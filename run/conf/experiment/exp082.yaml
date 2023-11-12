@@ -4,8 +4,10 @@ defaults:
   - override /decoder: CNN1DLSTMDecoder
 
 exp_name: exp082
-notes: "search feature_extractor kernel sizes"
-epoch: 20
+notes: "search downsample_rate"
+epoch: 30
+duration: 17280
+downsample_rate: 2
 
 feature_extractor:
   kernel_sizes:
@@ -14,13 +16,5 @@ feature_extractor:
     - 32
     - 16
     - 8
-    - 5
     - 4
-    - 3
     - 2
-# リストの場合がうまくいかない
-# hydra:
-#   sweeper:
-#     params:
-#       feature_extractor:
-#         kernel_sizes: [512,256,128,64,32,16,8,4,2],[256,128,64,32,16,8,4,2]
