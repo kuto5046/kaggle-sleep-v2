@@ -1,0 +1,23 @@
+# @package _global_
+defaults:
+  - override /model: Spec1D
+  - override /decoder: CNN1DTransformerDecoder
+exp_name: exp086
+notes: "1D transformer model"
+epoch: 50
+duration: 17280
+downsample_rate: 4
+
+offset: 10
+sigma: 10
+bg_sampling_rate: 0.5
+
+feature_extractor:
+  kernel_sizes:
+    - 128
+    - 64
+    - 32
+    - 16
+    - 8
+    - 4
+    - 2
