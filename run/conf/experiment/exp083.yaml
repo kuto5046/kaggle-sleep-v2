@@ -2,9 +2,8 @@
 defaults:
   - override /model: Spec1D
   - override /decoder: CNN1DLSTMDecoder
-  - override /split: fold_0 
 exp_name: exp083
-notes: "batch_size増やす 前の実験だとLSTMの場合大きい方が良かったので"
+notes: "1D LSTM model"
 epoch: 50
 duration: 17280
 downsample_rate: 4
