@@ -99,7 +99,7 @@ def inference(
 
 
 def make_submission(
-    keys: list[str], preds: np.ndarray, downsample_rate, score_th, distance, low_pass_filter_hour
+    keys: list[str], preds: np.ndarray, score_th, distance, low_pass_filter_hour
 ) -> pl.DataFrame:
     sub_df = post_process_for_seg(
         keys,
@@ -131,7 +131,6 @@ def main(cfg: DictConfig):
         sub_df = make_submission(
             keys,
             preds,
-            downsample_rate=cfg.downsample_rate,
             score_th=cfg.post_process.score_th,
             distance=cfg.post_process.distance,
             low_pass_filter_hour=cfg.post_process.low_pass_filter_hour,
