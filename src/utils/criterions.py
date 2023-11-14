@@ -14,6 +14,18 @@ class InbalancedMSELoss(nn.Module):
         return loss.mean()
 
 
+class InbalancedL1Loss(nn.Module):
+    def __init__(self, weight=1):
+        super().__init__()
+        self.weight = weight
+        self.criterion = nn.L1Loss(reduction="none")
+
+    def forward(self, logits, targets):
+        loss = self.criterion(logits, targets)
+        loss[targets != 0] *= self.weight
+        return loss.mean()
+
+
 class FocalLoss(nn.Module):
     def __init__(self, gamma=2.0, alpha=1.0):
         super().__init__()
