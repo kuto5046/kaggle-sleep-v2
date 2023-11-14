@@ -166,6 +166,7 @@ def get_model(cfg: DictConfig, feature_dim: int, n_classes: int, num_timesteps: 
             decoder=decoder,
             mixup_alpha=cfg.augmentation.mixup_alpha,
             cutmix_alpha=cfg.augmentation.cutmix_alpha,
+            inbalanced_loss_weight=cfg.inbalanced_loss_weight,
         )
     else:
         raise NotImplementedError

@@ -3,7 +3,7 @@ defaults:
   - override /model: Spec1D
   - override /decoder: CNN1DLSTMDecoder
 exp_name: exp088
-notes: "CNN1dの方にMSELoss追加するの忘れてたので追加 swap除去し忘れてたので削除"
+notes: "L1Lossを一応試す。swapあり"
 epoch: 50
 duration: 17280
 downsample_rate: 4

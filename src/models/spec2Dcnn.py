@@ -20,7 +20,7 @@ class Spec2DCNN(nn.Module):
         encoder_weights: Optional[str] = None,
         mixup_alpha: float = 0.5,
         cutmix_alpha: float = 0.5,
-        inbalanced_loss_weight: float = 10.0,
+        inbalanced_loss_weight: float = 1.0,
     ):
         super().__init__()
         self.feature_extractor = feature_extractor
