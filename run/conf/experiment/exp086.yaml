@@ -5,13 +5,19 @@ defaults:
 exp_name: exp086
 notes: "1D transformer model"
 epoch: 50
-duration: 17280
-downsample_rate: 4
+duration: 5760
+downsample_rate: 6
 
 offset: 10
 sigma: 10
 bg_sampling_rate: 0.5
 
+decoder:
+  hidden_size: 128
+  num_layers: 3
+  nhead: 4
+  dropout: 0.2
+  
 feature_extractor:
   kernel_sizes:
     - 128
