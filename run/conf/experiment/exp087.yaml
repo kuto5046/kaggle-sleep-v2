@@ -1,0 +1,25 @@
+# @package _global_
+defaults:
+  - override /model: Spec1D
+  - override /decoder: CNN1DLSTMDecoder
+exp_name: exp087
+notes: "diff特徴量"
+epoch: 50
+duration: 17280
+downsample_rate: 4
+
+feature_extractor:
+  kernel_sizes:
+    - 128
+    - 64
+    - 32
+    - 16
+    - 8
+    - 4
+    - 2
+
+features:
+  - "anglez_diff"
+  - "enmo_diff"
+  - "hour_sin"
+  - "hour_cos"
