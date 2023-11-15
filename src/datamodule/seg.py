@@ -12,6 +12,7 @@ from torch.utils.data import Dataset
 from torchvision.transforms.functional import resize
 
 from src.augmentation.local_shuffle import LocalShuffleAug
+from src.augmentation.mixup import SwapMixup
 from src.augmentation.swap_event import SwapEvent
 from src.utils.common import pad_if_needed
 
@@ -176,6 +177,11 @@ class TrainDataset(Dataset):
         self.swap_event_aug = SwapEvent(
             self.cfg.augmentation.swap_event_window_size, self.cfg.augmentation.swap_channels
         )
+        self.swap_mixup = SwapMixup(
+            self.cfg.augmentation.swap_event_window_size,
+            self.cfg.augmentation.swap_channels,
+            self.cfg.augmentation.swap_mixup_alpha,
+        )
 
     def __len__(self):
         return len(self.event_df)
@@ -222,6 +228,18 @@ class TrainDataset(Dataset):
             )
             feature = self.swap_event_aug(feature, label, swap_feature, swap_label, event)
 
+        if random.random() < self.cfg.augmentation.mixup_prob:
+            # 同一series_idの同一eventからランダムに1箇所をサンプリング
+            swap_pos = this_event_df[event].sample(1).to_numpy()[0]
+            swap_start, swap_end = random_crop(swap_pos, self.cfg.duration, n_steps)
+            swap_feature = this_feature[swap_start:swap_end]  # (duration, num_features)
+            swap_label = get_label(
+                this_event_df, num_frames, self.cfg.duration, swap_start, swap_end
+            )
+            swap_label[:, [1, 2]] = gaussian_label(
+                swap_label[:, [1, 2]], offset=self.cfg.offset, sigma=self.cfg.sigma
+            )
+            feature = self.swap_mixup(feature, label, swap_feature, swap_label, event)
         # upsample
         feature = torch.FloatTensor(feature.T).unsqueeze(0)  # (1, num_features, duration)
         feature = resize(
