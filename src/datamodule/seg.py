@@ -341,38 +341,8 @@ class TestDataset(Dataset):
 
 
 def drop_data(labels: pl.DataFrame):
-    # Getting series ids as a list for convenience
-    series_ids = labels["series_id"].unique(maintain_order=True).to_list()
-
-    # Removing series with mismatched counts:
-    onset_counts = (
-        labels.filter(pl.col("event") == "onset")
-        .group_by("series_id")
-        .count()
-        .sort("series_id")["count"]
-    )
-    wakeup_counts = (
-        labels.filter(pl.col("event") == "wakeup")
-        .group_by("series_id")
-        .count()
-        .sort("series_id")["count"]
-    )
-
-    counts = pl.DataFrame(
-        {
-            "series_id": sorted(series_ids),
-            "onset_counts": onset_counts,
-            "wakeup_counts": wakeup_counts,
-        }
-    )
-    count_mismatches = counts.filter(counts["onset_counts"] != counts["wakeup_counts"])
-    event_mismatch_series_ids = count_mismatches["series_id"].to_list()
-    drop_event_ids = (
-        labels.filter(pl.col("series_id").is_in(event_mismatch_series_ids))
-        .group_by(["series_id", "night"])
-        .count()
-        .filter(pl.col("count") != 2)
-    )
+    # mismatch eventを除外
+    drop_event_ids = labels.group_by(["series_id", "night"]).count().filter(pl.col("count") != 2)
     # target_eventsからdrop_event_idsのseries_idとnightの組み合わせを除外
     for series_id, night in drop_event_ids[["series_id", "night"]].to_numpy():
         labels = labels.filter(~((pl.col("series_id") == series_id) & (pl.col("night") == night)))
@@ -391,6 +361,7 @@ class SegDataModule(LightningDataModule):
         self.data_dir = Path(cfg.dir.data_dir)
         self.processed_dir = Path(cfg.dir.processed_dir)
         self.event_df = pl.read_csv(self.data_dir / "train_events.csv").drop_nulls()
+        # データを除くと悪化するのでコメントアウト
         # self.event_df = drop_data(self.event_df)
         self.train_event_df = self.event_df.filter(
             pl.col("series_id").is_in(self.cfg.split.train_series_ids)

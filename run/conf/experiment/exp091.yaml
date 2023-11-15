@@ -3,7 +3,7 @@ defaults:
   - override /model: Spec1D
   - override /decoder: CNN1DLSTMDecoder
 exp_name: exp091
-notes: "normal mixup"
+notes: "drop mismatch data"
 epoch: 50
 duration: 17280
 downsample_rate: 4
@@ -11,7 +11,7 @@ downsample_rate: 4
 inbalanced_loss_weight: 1
 
 augmentation:
-  mixup_prob: 0.5
+  mixup_prob: 0.0
   mixup_alpha: 0.4
   cutmix_prob: 0.0
   cutmix_alpha: 0.4
