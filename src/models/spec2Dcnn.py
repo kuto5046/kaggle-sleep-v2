@@ -7,7 +7,7 @@ import torch.nn as nn
 from src.augmentation.cutmix import Cutmix
 from src.augmentation.mixup import Mixup
 from src.utils.criterions import DiceLoss
-from src.utils.criterions import InbalancedMSELoss
+from src.utils.criterions import InbalancedL1Loss
 
 
 class Spec2DCNN(nn.Module):
@@ -34,7 +34,7 @@ class Spec2DCNN(nn.Module):
         self.mixup = Mixup(mixup_alpha)
         self.cutmix = Cutmix(cutmix_alpha)
         self.loss_fn1 = nn.BCEWithLogitsLoss()
-        self.loss_fn2 = InbalancedMSELoss(inbalanced_loss_weight)
+        self.loss_fn2 = InbalancedL1Loss(inbalanced_loss_weight)
         self.loss_fn3 = DiceLoss()
 
     def forward(
