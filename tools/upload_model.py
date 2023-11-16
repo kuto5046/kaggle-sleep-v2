@@ -8,13 +8,14 @@ from kaggle.api.kaggle_api_extended import KaggleApi
 
 TARGET_EXP_NAMES = [
     # "exp064",
-    "exp070",
+    # "exp070",
     # "exp073",
     # "exp075",
-    "exp077",
+    # "exp077",
     "exp083",
-    "exp085",
+    # "exp085",
     "exp088",
+    "exp090",
 ]
 
 
@@ -55,6 +56,9 @@ def copy_files_with_exts(source_dir: Path, dest_dir: Path, exts: list):
         "best_model.pth",
         # "latest_model.pth",
         ".hydra/*.yaml",
+        "keys.npy",
+        "preds.npy",
+        # "labels.npy",
     ],
 )
 @click.option("--user_name", "-u", default="kuto0633")
