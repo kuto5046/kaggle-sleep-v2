@@ -1,0 +1,8 @@
+name: UNet1DAttentionDecoder
+bilinear: false
+se: false
+res: false
+scale_factor: 2
+dropout: 0.2
+attention_window_size: 32
+attention_pooling: max # max or avg

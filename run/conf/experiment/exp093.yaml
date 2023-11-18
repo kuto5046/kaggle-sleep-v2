@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+  - override /decoder: UNet1DAttentionDecoder
+  - _self_
+
+exp_name: exp093
+notes: "window based attentionでsleepをevent予測に使う"
+
+decoder:
+  attention_window_size: 32
+  attention_pooling: max # max or avg

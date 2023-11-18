@@ -8,6 +8,7 @@ from src.models.decoder.lstmdecoder import LSTMDecoder
 from src.models.decoder.mlpdecoder import MLPDecoder
 from src.models.decoder.transformerdecoder import CNN1DTransformerDecoder
 from src.models.decoder.transformerdecoder import TransformerDecoder
+from src.models.decoder.unet1ddecoder import UNet1DAttentionDecoder
 from src.models.decoder.unet1ddecoder import UNet1DDecoder
 from src.models.feature_extractor.cnn import CNN1DLSTMFeatureExtractor
 from src.models.feature_extractor.cnn import CNNSpectrogram
@@ -18,9 +19,15 @@ from src.models.spec1D import Spec1D
 from src.models.spec2Dcnn import Spec2DCNN
 
 FEATURE_EXTRACTORS = Union[
-    CNNSpectrogram, PANNsFeatureExtractor, LSTMFeatureExtractor, SpecFeatureExtractor
+    CNNSpectrogram,
+    PANNsFeatureExtractor,
+    LSTMFeatureExtractor,
+    SpecFeatureExtractor,
+    CNN1DLSTMFeatureExtractor,
 ]
-DECODERS = Union[UNet1DDecoder, LSTMDecoder, TransformerDecoder, MLPDecoder]
+DECODERS = Union[
+    UNet1DDecoder, LSTMDecoder, TransformerDecoder, MLPDecoder, UNet1DAttentionDecoder
+]
 MODELS = Union[Spec1D, Spec2DCNN]
 
 
@@ -96,6 +103,19 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
             res=cfg.decoder.res,
             scale_factor=cfg.decoder.scale_factor,
             dropout=cfg.decoder.dropout,
+        )
+    elif cfg.decoder.name == "UNet1DAttentionDecoder":
+        decoder = UNet1DAttentionDecoder(
+            n_channels=n_channels,
+            n_classes=n_classes,
+            duration=num_timesteps,
+            bilinear=cfg.decoder.bilinear,
+            se=cfg.decoder.se,
+            res=cfg.decoder.res,
+            scale_factor=cfg.decoder.scale_factor,
+            dropout=cfg.decoder.dropout,
+            attention_window_size=cfg.decoder.attention_window_size,
+            attention_pooling=cfg.decoder.attention_pooling,
         )
     elif cfg.decoder.name == "LSTMDecoder":
         decoder = LSTMDecoder(

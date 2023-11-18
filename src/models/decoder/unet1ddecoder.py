@@ -211,3 +211,128 @@ class UNet1DDecoder(nn.Module):
         # classifier
         logits = self.cls(x)  # (batch_size, n_classes, n_timesteps)
         return logits.transpose(1, 2)  # (batch_size, n_timesteps, n_classes)
+
+
+class UNet1DAttentionDecoder(nn.Module):
+    def __init__(
+        self,
+        n_channels: int,
+        n_classes: int,
+        duration: int,
+        bilinear: bool = True,
+        se: bool = False,
+        res: bool = False,
+        scale_factor: int = 2,
+        dropout: float = 0.2,
+        attention_window_size: int = 32,
+        attention_pooling: str = "max",
+    ):
+        super().__init__()
+        self.n_channels = n_channels
+        self.n_classes = n_classes
+        self.duration = duration
+        self.bilinear = bilinear
+        self.se = se
+        self.res = res
+        self.scale_factor = scale_factor
+        self.attention_window_size = attention_window_size
+        self.attention_pooling = attention_pooling
+
+        factor = 2 if bilinear else 1
+        self.inc = DoubleConv(
+            self.n_channels, 64, norm=partial(create_layer_norm, length=self.duration)
+        )
+        self.down1 = Down(
+            64, 128, scale_factor, norm=partial(create_layer_norm, length=self.duration // 2)
+        )
+        self.down2 = Down(
+            128, 256, scale_factor, norm=partial(create_layer_norm, length=self.duration // 4)
+        )
+        self.down3 = Down(
+            256, 512, scale_factor, norm=partial(create_layer_norm, length=self.duration // 8)
+        )
+        self.down4 = Down(
+            512,
+            1024 // factor,
+            scale_factor,
+            norm=partial(create_layer_norm, length=self.duration // 16),
+        )
+        self.up1 = Up(
+            1024,
+            512 // factor,
+            bilinear,
+            scale_factor,
+            norm=partial(create_layer_norm, length=self.duration // 8),
+        )
+        self.up2 = Up(
+            512,
+            256 // factor,
+            bilinear,
+            scale_factor,
+            norm=partial(create_layer_norm, length=self.duration // 4),
+        )
+        self.up3 = Up(
+            256,
+            128 // factor,
+            bilinear,
+            scale_factor,
+            norm=partial(create_layer_norm, length=self.duration // 2),
+        )
+        self.up4 = Up(
+            128, 64, bilinear, scale_factor, norm=partial(create_layer_norm, length=self.duration)
+        )
+
+        self.cls = nn.Sequential(
+            nn.Conv1d(64, 64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv1d(64, self.n_classes, kernel_size=1, padding=0),
+            nn.Dropout(dropout),
+        )
+        self.loss_fn = nn.BCEWithLogitsLoss()
+
+    def forward(
+        self, x: torch.Tensor, labels: Optional[torch.Tensor] = None
+    ) -> dict[str, Optional[torch.Tensor]]:
+        """Forward
+
+        Args:
+            x (torch.Tensor): (batch_size, n_channels, n_timesteps)
+
+        Returns:
+            torch.Tensor: (batch_size, n_timesteps, n_classes)
+        """
+
+        # 1D U-Net
+        x1 = self.inc(x)
+        x2 = self.down1(x1)
+        x3 = self.down2(x2)
+        x4 = self.down3(x3)
+        x = self.down4(x4)
+        x = self.up1(x, x4)
+        x = self.up2(x, x3)
+        x = self.up3(x, x2)
+        x = self.up4(x, x1)
+
+        # classifier
+        logits = self.cls(x)  # (batch_size, n_classes, n_timesteps)
+        logits = logits.transpose(1, 2)  # (batch_size, n_timesteps, n_classes)
+
+        # window based attention
+        sleep = logits[:, :, 0]
+        event = logits[:, :, 1:]
+        attention = torch.sigmoid(sleep)
+        attention = F.pad(
+            attention, (self.attention_window_size, self.attention_window_size), mode="replicate"
+        )
+        if self.attention_pooling == "avg":
+            attention = F.avg_pool1d(
+                attention.unsqueeze(0), kernel_size=2 * self.attention_window_size + 1, stride=1
+            ).squeeze(0)
+        elif self.attention_pooling == "max":
+            attention = F.max_pool1d(
+                attention.unsqueeze(0), kernel_size=2 * self.attention_window_size + 1, stride=1
+            ).squeeze(0)
+        else:
+            NotImplementedError()
+        event *= attention.unsqueeze(-1)
+        return torch.cat([sleep.unsqueeze(-1), event], dim=2)
