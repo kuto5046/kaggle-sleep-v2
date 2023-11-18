@@ -4,7 +4,7 @@ defaults:
   - _self_
 
 exp_name: exp093
-notes: "window based attentionでsleepをevent予測に使う"
+notes: "window based attention(before,afterでscore出す)でsleepをevent予測に使う"
 
 decoder:
   attention_window_size: 32
