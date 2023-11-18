@@ -290,6 +290,9 @@ class UNet1DAttentionDecoder(nn.Module):
         )
         self.loss_fn = nn.BCEWithLogitsLoss()
 
+        self.onset_output_layer = nn.Linear(2, 1)
+        self.wakeup_output_layer = nn.Linear(2, 1)
+
     def forward(
         self, x: torch.Tensor, labels: Optional[torch.Tensor] = None
     ) -> dict[str, Optional[torch.Tensor]]:
@@ -317,22 +320,50 @@ class UNet1DAttentionDecoder(nn.Module):
         logits = self.cls(x)  # (batch_size, n_classes, n_timesteps)
         logits = logits.transpose(1, 2)  # (batch_size, n_timesteps, n_classes)
 
-        # window based attention
         sleep = logits[:, :, 0]
-        event = logits[:, :, 1:]
-        attention = torch.sigmoid(sleep)
-        attention = F.pad(
-            attention, (self.attention_window_size, self.attention_window_size), mode="replicate"
+        onset_event = logits[:, :, 1]
+        wakeup_event = logits[:, :, 2]
+
+        # postprocessing by window based sleep attention
+        sleep_score = torch.sigmoid(sleep)
+        before_sleep_score = F.pad(sleep_score, (self.attention_window_size, 0), mode="replicate")
+        after_sleep_score = F.pad(sleep_score, (0, self.attention_window_size), mode="replicate")
+
+        onset_attention = torch.where(
+            after_sleep_score - before_sleep_score > 0,
+            after_sleep_score - before_sleep_score,
+            torch.zeros_like(after_sleep_score),
         )
+        wakeup_attention = torch.where(
+            before_sleep_score - after_sleep_score > 0,
+            before_sleep_score - after_sleep_score,
+            torch.zeros_like(before_sleep_score),
+        )
+
         if self.attention_pooling == "avg":
-            attention = F.avg_pool1d(
-                attention.unsqueeze(0), kernel_size=2 * self.attention_window_size + 1, stride=1
-            ).squeeze(0)
+            onset_attention = F.avg_pool1d(
+                onset_attention, kernel_size=self.attention_window_size + 1, stride=1
+            )
+            wakeup_attention = F.avg_pool1d(
+                wakeup_attention, kernel_size=self.attention_window_size + 1, stride=1
+            )
         elif self.attention_pooling == "max":
-            attention = F.max_pool1d(
-                attention.unsqueeze(0), kernel_size=2 * self.attention_window_size + 1, stride=1
-            ).squeeze(0)
+            onset_attention = F.max_pool1d(
+                onset_attention, kernel_size=self.attention_window_size + 1, stride=1
+            )
+            wakeup_attention = F.max_pool1d(
+                wakeup_attention, kernel_size=self.attention_window_size + 1, stride=1
+            )
         else:
             NotImplementedError()
-        event *= attention.unsqueeze(-1)
-        return torch.cat([sleep.unsqueeze(-1), event], dim=2)
+
+        # event予測にsleep予測から求めたattention scoreをかける
+        # これによりsleep予測が行われていないところはevent予測も行われない
+        # 後処理でやってもよさそうだがここをいい感じにやって欲しいのでモデル内でやる
+        onset_event = self.onset_output_layer(
+            torch.cat([onset_event.unsqueeze(-1), onset_attention.unsqueeze(-1)], dim=2)
+        )
+        wakeup_event = self.wakeup_output_layer(
+            torch.cat([wakeup_event.unsqueeze(-1), wakeup_attention.unsqueeze(-1)], dim=2)
+        )
+        return torch.cat([sleep.unsqueeze(-1), onset_event, wakeup_event], dim=2)
