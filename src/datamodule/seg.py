@@ -228,7 +228,7 @@ class TrainDataset(Dataset):
             )
             feature = self.swap_event_aug(feature, label, swap_feature, swap_label, event)
 
-        if random.random() < self.cfg.augmentation.mixup_prob:
+        if random.random() < self.cfg.augmentation.swap_mixup_prob:
             # 同一series_idの同一eventからランダムに1箇所をサンプリング
             swap_pos = this_event_df[event].sample(1).to_numpy()[0]
             swap_start, swap_end = random_crop(swap_pos, self.cfg.duration, n_steps)

@@ -53,6 +53,8 @@ augmentation:
   cutmix_alpha: 0.4
   local_shuffle_prob: 0.0
   local_shuffle_window_size: 3
+  swap_mixup_prob: 0.0
+  swap_mixup_alpha: 0.4
   swap_event_prob: 0.5
   swap_event_window_size: 100  # 5s*2*100 = 1000s = 16.6min
   swap_channels: [0, 1]  # swapする特徴量の次元
