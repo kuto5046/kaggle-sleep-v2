@@ -154,6 +154,22 @@ def nearest_valid_size(input_size: int, downsample_rate: int) -> int:
     return input_size
 
 
+def event_relabeling(gt_df: pl.DataFrame, cfg: DictConfig) -> pl.DataFrame:
+    relabeled_events = pl.read_csv(Path(cfg.dir.data_dir) / "relabeled_train_events.csv")
+    relabeled_gt_df = gt_df.join(relabeled_events, on=["series_id", "step", "event"], how="left")
+    relabeled_gt_df = relabeled_gt_df.with_columns(
+        pl.when(pl.col("relabeled_step").is_null())
+        .then(pl.col("step"))
+        .otherwise(pl.col("relabeled_step"))
+        .alias("step"),
+    ).select(["series_id", "night", "event", "step", "timestamp"])
+    assert gt_df.shape == relabeled_gt_df.shape
+    assert np.sum(gt_df["step"].to_numpy() != relabeled_gt_df["step"].to_numpy()) == len(
+        relabeled_events
+    )
+    return relabeled_gt_df
+
+
 class TrainDataset(Dataset):
     def __init__(
         self,
@@ -162,6 +178,9 @@ class TrainDataset(Dataset):
         features: dict[str, np.ndarray],
     ):
         self.cfg = cfg
+        # trainのみrelabelingしてvalidの評価は元のラベルを使う
+        if cfg.relabeling:
+            event_df = event_relabeling(event_df, cfg)
         self.event_df: pd.DataFrame = (
             event_df.pivot(index=["series_id", "night"], columns="event", values="step")
             .drop_nulls()

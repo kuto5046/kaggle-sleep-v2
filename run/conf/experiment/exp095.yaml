@@ -1,0 +1,22 @@
+# @package _global_
+defaults:
+  - override /model: Spec1D
+  - override /decoder: CNN1DLSTMDecoder
+exp_name: exp095
+notes: "relabeling"
+epoch: 50
+duration: 17280
+downsample_rate: 4
+
+relabeling: true
+inbalanced_loss_weight: 1
+
+feature_extractor:
+  kernel_sizes:
+    - 128
+    - 64
+    - 32
+    - 16
+    - 8
+    - 4
+    - 2
