@@ -164,9 +164,11 @@ def event_relabeling(gt_df: pl.DataFrame, cfg: DictConfig) -> pl.DataFrame:
         .alias("step"),
     ).select(["series_id", "night", "event", "step", "timestamp"])
     assert gt_df.shape == relabeled_gt_df.shape
-    assert np.sum(gt_df["step"].to_numpy() != relabeled_gt_df["step"].to_numpy()) == len(
-        relabeled_events
+    changed_label_count = np.sum(gt_df["step"].to_numpy() != relabeled_gt_df["step"].to_numpy())
+    relabeled_count = len(
+        relabeled_events.filter(pl.col("series_id").is_in(gt_df["series_id"].unique().to_list()))
     )
+    assert changed_label_count == relabeled_count
     return relabeled_gt_df
 
 
