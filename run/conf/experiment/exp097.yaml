@@ -1,0 +1,8 @@
+# @package _global_
+exp_name: exp097
+notes: "pretrained model"
+
+model:
+  name: Spec2DCNN
+  encoder_name: resnet34
+  encoder_weights: imagenet
