@@ -17,6 +17,7 @@ from src.datamodule.seg import nearest_valid_size
 from src.models.common import get_model
 from src.utils.common import trace
 from src.utils.post_process import post_process_for_seg
+from src.utils.post_process import post_process_for_sliding_data
 
 
 def load_model(cfg: DictConfig) -> nn.Module:
@@ -94,7 +95,8 @@ def inference(
             keys.extend(key)
 
     preds = np.concatenate(preds)
-
+    # slideさせてるので重複しているstepを平均する
+    preds, keys = post_process_for_sliding_data(preds, keys, duration)
     return keys, preds  # type: ignore
 
 

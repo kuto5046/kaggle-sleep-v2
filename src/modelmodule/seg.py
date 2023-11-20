@@ -13,6 +13,7 @@ from src.datamodule.seg import nearest_valid_size
 from src.models.common import get_model
 from src.utils.metrics import event_detection_ap
 from src.utils.post_process import post_process_for_seg
+from src.utils.post_process import post_process_for_sliding_data
 
 
 class SegModel(LightningModule):
@@ -96,13 +97,21 @@ class SegModel(LightningModule):
         torch.save(self.model.state_dict(), "latest_model.pth")
 
     def on_validation_epoch_end(self):
-        keys = []
+        _keys = []
+        _preds = []
+        _labels = []
         for x in self.validation_step_outputs:
-            keys.extend(x[0])
-        labels = np.concatenate([x[1] for x in self.validation_step_outputs])
-        preds = np.concatenate([x[2] for x in self.validation_step_outputs])
-        # losses = np.array([x[3] for x in self.validation_step_outputs])
-        # loss = losses.mean()
+            _keys.extend(x[0])
+            _labels.append(x[1])
+            _preds.append(x[2])
+        labels = np.concatenate(_labels)
+        preds = np.concatenate(_preds)
+        keys = _keys
+        np.save("debug_keys.npy", np.array(keys))
+        np.save("debug_labels.npy", labels)
+        np.save("debug_preds.npy", preds)
+        preds, keys = post_process_for_sliding_data(preds, _keys, self.cfg.duration)
+        labels, _ = post_process_for_sliding_data(labels, _keys, self.cfg.duration)
 
         val_pred_df = post_process_for_seg(
             keys=keys,

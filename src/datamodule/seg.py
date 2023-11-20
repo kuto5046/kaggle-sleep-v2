@@ -48,6 +48,10 @@ def load_chunk_features(
     processed_dir: Path,
     phase: str,
 ) -> dict[str, np.ndarray]:
+    """
+    TTA的な感じで予測区間をスライドさせる
+    重複する部分は予測後に平均をとる
+    """
     features = {}
 
     if series_ids is None:
@@ -59,9 +63,12 @@ def load_chunk_features(
         for feature_name in feature_names:
             this_feature.append(np.load(series_dir / f"{feature_name}.npy"))
         this_feature = np.stack(this_feature, axis=1)
-        num_chunks = (len(this_feature) // duration) + 1
+        slide_duration = duration // 2
+        num_chunks = max(1, (len(this_feature) - duration) // slide_duration + 1)
         for i in range(num_chunks):
-            chunk_feature = this_feature[i * duration : (i + 1) * duration]
+            start = i * slide_duration
+            end = start + duration
+            chunk_feature = this_feature[start:end]
             chunk_feature = pad_if_needed(chunk_feature, duration, pad_value=0)  # type: ignore
             features[f"{series_id}_{i:07}"] = chunk_feature
 
@@ -311,7 +318,8 @@ class ValidDataset(Dataset):
 
         series_id, chunk_id = key.split("_")
         chunk_id = int(chunk_id)
-        start = chunk_id * self.cfg.duration
+        slide_duration = self.cfg.duration // 2
+        start = chunk_id * slide_duration
         end = start + self.cfg.duration
         num_frames = self.upsampled_num_frames // self.cfg.downsample_rate
         label = get_label(
