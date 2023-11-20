@@ -29,7 +29,7 @@ def copy_all_files(source_dirs: Path, dest_dir: Path):
 
 
 @click.command()
-@click.option("--title", "-t", default="kuto-CMI-code")
+@click.option("--title", "-t", default="kuto-cmi-code")
 @click.option("--dirs", "-d", type=list[Path], default=[Path("./src"), Path("./run")])
 @click.option("--user_name", "-u", default="kuto0633")
 @click.option("--new", "-n", is_flag=True)

@@ -12,7 +12,7 @@ TARGET_EXP_NAMES = [
     # "exp073",
     # "exp075",
     # "exp077",
-    "exp083",
+    # "exp083",
     # "exp085",
     "exp088",
     "exp090",
@@ -46,7 +46,7 @@ def copy_files_with_exts(source_dir: Path, dest_dir: Path, exts: list):
 
 
 @click.command()
-@click.option("--title", "-t", default="kuto-CMI-model")
+@click.option("--title", "-t", default="kuto-cmi-model")
 @click.option("--dir", "-d", type=Path, default="./output/train")
 @click.option(
     "--extentions",
