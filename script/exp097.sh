@@ -6,3 +6,4 @@ rye run python run/train.py +experiment=exp097 epoch=20 model.encoder_name=effic
 rye run python run/train.py +experiment=exp097 epoch=20 model.encoder_name=resnext50_32x4d
 rye run python run/train.py +experiment=exp097 epoch=20 model.encoder_name=timm-resnest14d
 rye run python run/train.py +experiment=exp097 epoch=20 model.encoder_name=timm-resnest50d
+rye run python run/train.py +experiment=exp097 epoch=20
