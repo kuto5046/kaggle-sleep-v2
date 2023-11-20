@@ -58,7 +58,7 @@ def copy_files_with_exts(source_dir: Path, dest_dir: Path, exts: list):
         ".hydra/*.yaml",
         "keys.npy",
         "preds.npy",
-        # "labels.npy",
+        "labels.npy",
     ],
 )
 @click.option("--user_name", "-u", default="kuto0633")
