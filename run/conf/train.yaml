@@ -64,6 +64,8 @@ post_process:
   score_th: 0.02
   distance: 10
   low_pass_filter_hour: 1
+  window_size: 100
+  event_weight: 1.0
 
 # label
 labels:
