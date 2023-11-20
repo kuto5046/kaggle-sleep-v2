@@ -46,7 +46,7 @@ def copy_files_with_exts(source_dir: Path, dest_dir: Path, exts: list):
 
 
 @click.command()
-@click.option("--title", "-t", default="CMI-model")
+@click.option("--title", "-t", default="kuto-CMI-model")
 @click.option("--dir", "-d", type=Path, default="./output/train")
 @click.option(
     "--extentions",

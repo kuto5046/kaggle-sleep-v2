@@ -14,7 +14,7 @@ def copy_all_files(source_dirs: Path, dest_dir: Path):
     """
     for source_dir in source_dirs:
         # Search for all file paths in source_dir
-        for source_path in source_dir.rglob('*'):
+        for source_path in source_dir.rglob("*"):
             if source_path.is_file():
                 # Calculate the relative path in dest_dir
                 relative_path = source_path.relative_to(source_dir)
@@ -28,10 +28,9 @@ def copy_all_files(source_dirs: Path, dest_dir: Path):
                 print(f"Copied {source_path} to {dest_path}")
 
 
-
 @click.command()
-@click.option("--title", "-t", default="CMI-code")
-@click.option("--dirs", "-d", type=list[Path], default=[Path("./src"), Path('./run')])
+@click.option("--title", "-t", default="kuto-CMI-code")
+@click.option("--dirs", "-d", type=list[Path], default=[Path("./src"), Path("./run")])
 @click.option("--user_name", "-u", default="kuto0633")
 @click.option("--new", "-n", is_flag=True)
 def main(
