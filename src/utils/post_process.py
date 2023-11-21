@@ -287,6 +287,7 @@ def post_process_for_sliding_data(values: np.ndarray, keys: list[str], duration:
     all_values = []
     all_keys = []
     series_ids = np.array([key.split("_")[0] for key in keys])
+    # seriesの順番が変わってしまうがkeyも合わせて変わるため問題ない
     unique_series_ids = np.unique(series_ids)
     for series_id in unique_series_ids:
         series_idx = np.where(series_ids == series_id)[0]

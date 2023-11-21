@@ -60,6 +60,7 @@ def get_test_dataloader(cfg: DictConfig) -> DataLoader:
         series_ids=series_ids,
         processed_dir=Path(cfg.dir.processed_dir),
         phase=cfg.phase,
+        slide_tta=cfg.slide_tta,
     )
     test_dataset = TestDataset(cfg, chunk_features=chunk_features)
     test_dataloader = DataLoader(
@@ -74,7 +75,12 @@ def get_test_dataloader(cfg: DictConfig) -> DataLoader:
 
 
 def inference(
-    duration: int, loader: DataLoader, model: nn.Module, device: torch.device, use_amp
+    duration: int,
+    loader: DataLoader,
+    model: nn.Module,
+    device: torch.device,
+    use_amp,
+    slide_tta: bool,
 ) -> tuple[list[str], np.ndarray]:
     model = model.to(device)
     model.eval()
@@ -96,8 +102,10 @@ def inference(
             keys.extend(key)
 
     preds = np.concatenate(preds)
-    # slideさせてるので重複しているstepを平均する
-    preds, keys = post_process_for_sliding_data(preds, keys, duration)
+
+    if slide_tta:
+        # slideさせてるので重複しているstepを平均する
+        preds, keys = post_process_for_sliding_data(preds, keys, duration)
     return keys, preds  # type: ignore
 
 
@@ -126,7 +134,14 @@ def main(cfg: DictConfig):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     with trace("inference"):
-        keys, preds = inference(cfg.duration, test_dataloader, model, device, use_amp=cfg.use_amp)
+        keys, preds = inference(
+            cfg.duration,
+            test_dataloader,
+            model,
+            device,
+            use_amp=cfg.use_amp,
+            slide_tta=cfg.slide_tta,
+        )
         # sleep予測値をevent予測値に変換し混ぜる
         # event_weight=1.0(default)の場合はeventのみの予測となる
         preds = post_process_asleep_to_event(

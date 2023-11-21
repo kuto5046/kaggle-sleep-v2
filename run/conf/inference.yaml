@@ -37,6 +37,9 @@ use_amp: true
 # loss
 inbalanced_loss_weight: 1
 
+# dataset
+slide_tta: false
+
 # augmentation
 augmentation:
   mixup_prob: 0.0

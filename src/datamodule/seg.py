@@ -47,6 +47,7 @@ def load_chunk_features(
     series_ids: Optional[list[str]],
     processed_dir: Path,
     phase: str,
+    slide_tta: bool,
 ) -> dict[str, np.ndarray]:
     """
     TTA的な感じで予測区間をスライドさせる
@@ -63,15 +64,20 @@ def load_chunk_features(
         for feature_name in feature_names:
             this_feature.append(np.load(series_dir / f"{feature_name}.npy"))
         this_feature = np.stack(this_feature, axis=1)
-        slide_duration = duration // 2
-        num_chunks = max(1, (len(this_feature) - duration) // slide_duration + 1)
+
+        if slide_tta:
+            slide_duration = duration // 2
+            num_chunks = max(1, (len(this_feature) - duration) // slide_duration + 1)
+        else:
+            slide_duration = duration
+            num_chunks = (len(this_feature) // duration) + 1
+
         for i in range(num_chunks):
             start = i * slide_duration
             end = start + duration
             chunk_feature = this_feature[start:end]
             chunk_feature = pad_if_needed(chunk_feature, duration, pad_value=0)  # type: ignore
             features[f"{series_id}_{i:07}"] = chunk_feature
-
     return features  # type: ignore
 
 
@@ -413,6 +419,7 @@ class SegDataModule(LightningDataModule):
             series_ids=self.cfg.split.valid_series_ids,
             processed_dir=self.processed_dir,
             phase="train",
+            slide_tta=self.cfg.slide_tta,
         )
 
     def train_dataloader(self):

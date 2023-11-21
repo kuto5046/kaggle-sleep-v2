@@ -106,12 +106,12 @@ class SegModel(LightningModule):
             _preds.append(x[2])
         labels = np.concatenate(_labels)
         preds = np.concatenate(_preds)
-        keys = _keys
-        np.save("debug_keys.npy", np.array(keys))
-        np.save("debug_labels.npy", labels)
-        np.save("debug_preds.npy", preds)
-        preds, keys = post_process_for_sliding_data(preds, _keys, self.cfg.duration)
-        labels, _ = post_process_for_sliding_data(labels, _keys, self.cfg.duration)
+
+        if self.cfg.slide_tta:
+            preds, keys = post_process_for_sliding_data(preds, _keys, self.cfg.duration)
+            labels, _ = post_process_for_sliding_data(labels, _keys, self.cfg.duration)
+        else:
+            keys = _keys
 
         val_pred_df = post_process_for_seg(
             keys=keys,
