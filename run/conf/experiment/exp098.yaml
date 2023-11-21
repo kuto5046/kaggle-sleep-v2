@@ -1,7 +1,6 @@
 # @package _global_
 exp_name: exp098
 notes: "efficientnet-b3"
-slide_tta: true
 model:
   name: Spec2DCNN
   encoder_name: efficientnet-b3
