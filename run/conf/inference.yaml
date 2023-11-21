@@ -39,6 +39,7 @@ inbalanced_loss_weight: 1
 
 # dataset
 slide_tta: false
+make_submission: true
 
 # augmentation
 augmentation:

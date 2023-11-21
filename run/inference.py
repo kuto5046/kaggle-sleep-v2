@@ -150,15 +150,16 @@ def main(cfg: DictConfig):
         np.save("keys.npy", np.array(keys))
         np.save("preds.npy", preds)
 
-    with trace("make submission"):
-        sub_df = make_submission(
-            keys,
-            preds,
-            score_th=cfg.post_process.score_th,
-            distance=cfg.post_process.distance,
-            low_pass_filter_hour=cfg.post_process.low_pass_filter_hour,
-        )
-    sub_df.write_csv(Path(cfg.dir.sub_dir) / "submission.csv")
+    if cfg.make_submission:
+        with trace("make submission"):
+            sub_df = make_submission(
+                keys,
+                preds,
+                score_th=cfg.post_process.score_th,
+                distance=cfg.post_process.distance,
+                low_pass_filter_hour=cfg.post_process.low_pass_filter_hour,
+            )
+        sub_df.write_csv(Path(cfg.dir.sub_dir) / "submission.csv")
 
 
 if __name__ == "__main__":
