@@ -38,7 +38,7 @@ monitor_mode: max
 check_val_every_n_epoch: 1
 
 # loss
-inbalanced_loss_weight: 1
+imbalanced_loss_weight: 1
 
 # Dataset
 offset: 10

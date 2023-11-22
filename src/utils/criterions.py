@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-class InbalancedMSELoss(nn.Module):
+class ImbalancedMSELoss(nn.Module):
     def __init__(self, weight=1):
         super().__init__()
         self.weight = weight
@@ -14,7 +14,7 @@ class InbalancedMSELoss(nn.Module):
         return loss.mean()
 
 
-class InbalancedL1Loss(nn.Module):
+class ImbalancedL1Loss(nn.Module):
     def __init__(self, weight=1):
         super().__init__()
         self.weight = weight
