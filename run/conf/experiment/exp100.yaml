@@ -1,0 +1,12 @@
+# @package _global_
+exp_name: exp100
+notes: "warmup 200 steps"
+
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b3
+  encoder_weights: imagenet
+
+# scheduler
+scheduler:
+  num_warmup_steps: 200
