@@ -1,0 +1,8 @@
+# @package _global_
+exp_name: exp102
+notes: "exp098からrelabeling除く"
+
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b3
+  encoder_weights: imagenet
