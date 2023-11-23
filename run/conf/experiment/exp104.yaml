@@ -1,0 +1,13 @@
+# @package _global_
+exp_name: exp104
+notes: "warmup"
+
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b3
+  encoder_weights: imagenet
+
+# scheduler
+scheduler:
+  num_warmup_steps: 100 # コマンドラインで指定する
+

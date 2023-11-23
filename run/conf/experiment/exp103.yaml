@@ -1,0 +1,10 @@
+# @package _global_
+exp_name: exp103
+notes: "SAM Optimizer"
+
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b3
+  encoder_weights: imagenet
+
+sam_optimizer: true
