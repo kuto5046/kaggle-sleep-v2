@@ -324,9 +324,13 @@ class ValidDataset(Dataset):
 
         series_id, chunk_id = key.split("_")
         chunk_id = int(chunk_id)
-        slide_duration = self.cfg.duration // 2
-        start = chunk_id * slide_duration
-        end = start + self.cfg.duration
+        if self.cfg.slide_tta:
+            slide_duration = self.cfg.duration // 2
+            start = chunk_id * slide_duration
+            end = start + self.cfg.duration
+        else:
+            start = chunk_id * self.cfg.duration
+            end = start + self.cfg.duration
         num_frames = self.upsampled_num_frames // self.cfg.downsample_rate
         label = get_label(
             self.event_df.query("series_id == @series_id").reset_index(drop=True),
