@@ -113,28 +113,12 @@ def event_score_from_sleep_prediction(this_series_preds: np.ndarray, window_size
     return this_series_preds
 
 
-def ensemble_sleep_and_event_prediction(
-    this_series_preds: np.ndarray, window_size: int, event_weight: float
-):
-    """
-    sleep予測から計算したevent予測結果を元々のevent予測結果とアンサンブルする
-    入出力は3次元の予測値
-    """
-    this_series_sleep = this_series_preds[:, 0].reshape(-1, 1)  # 1次元
-    this_series_events = this_series_preds[:, 1:]  # 2次元
-    this_series_events_by_sleep = event_score_from_sleep_prediction(
-        this_series_sleep, window_size=window_size
-    )  # 2次元
-    this_series_events = (
-        event_weight * this_series_events + (1 - event_weight) * this_series_events_by_sleep
-    )  # 2次元
-    output_series_preds = np.concatenate([this_series_sleep, this_series_events], axis=1)  # 3次元
-    return output_series_preds
-
-
 def post_process_asleep_to_event(
     preds: np.ndarray, keys: list[str], window_size: int, event_weight: float
 ):
+    """
+    与えらえたweightをもとに内部でsleepとeventを混ぜる
+    """
     series_ids = np.array(list(map(lambda x: x.split("_")[0], keys)))
     # 順番を保持したいためpandasのuniqueを利用
     # unique_series_ids = np.unique(series_ids)
@@ -144,13 +128,54 @@ def post_process_asleep_to_event(
     for series_id in unique_series_ids:
         series_idx = np.where(series_ids == series_id)[0]
         this_series_preds = preds[series_idx].reshape(-1, 3)
-        this_series_preds = ensemble_sleep_and_event_prediction(
-            this_series_preds, window_size, event_weight
-        )
+        this_series_preds_by_sleep = get_event_prediction_from_sleep(
+            this_series_preds, window_size
+        )  # 3次元
+
+        # weighted average
+        this_series_preds = (
+            event_weight * this_series_preds + (1 - event_weight) * this_series_preds_by_sleep
+        )  # 3次元
         this_series_preds = this_series_preds.reshape(-1, duration, 3)
         results.append(this_series_preds)
     preds = np.concatenate(results)
     return preds
+
+
+def get_event_prediction_from_sleep(this_series_preds: np.ndarray, window_size: int):
+    """
+    sleep予測から計算したevent予測結果を出力する
+    入出力は3次元の予測値
+    """
+    this_series_sleep = this_series_preds[:, 0].reshape(-1, 1)  # 1次元
+    # this_series_events = this_series_preds[:, 1:]  # 2次元
+    this_series_events_by_sleep = event_score_from_sleep_prediction(
+        this_series_sleep, window_size=window_size
+    )  # 2次元
+    output_series_preds = np.concatenate(
+        [this_series_sleep, this_series_events_by_sleep], axis=1
+    )  # 3次元
+    return output_series_preds
+
+
+def post_process_asleep_to_event_v2(preds: np.ndarray, keys: list[str], window_size: int):
+    """
+    内部では混ぜずsleepをeventに変換した3次元の予測値を返す(sleepは元の値で埋めておく)
+    """
+    series_ids = np.array(list(map(lambda x: x.split("_")[0], keys)))
+    # 順番を保持したいためpandasのuniqueを利用
+    # unique_series_ids = np.unique(series_ids)
+    unique_series_ids = pd.Series(series_ids).unique()
+    results = []
+    duration = preds.shape[1]
+    for series_id in unique_series_ids:
+        series_idx = np.where(series_ids == series_id)[0]
+        this_series_preds = preds[series_idx].reshape(-1, 3)
+        this_series_preds = get_event_prediction_from_sleep(this_series_preds, window_size)
+        this_series_preds = this_series_preds.reshape(-1, duration, 3)
+        results.append(this_series_preds)
+    preds = np.concatenate(results)
+    return preds  # 3次元
 
 
 def post_process_for_asleep(
