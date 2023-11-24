@@ -1,0 +1,10 @@
+# @package _global_
+exp_name: exp107
+notes: "loss weight"
+
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b3
+  encoder_weights: imagenet
+
+imbalanced_loss_weight: 1
