@@ -1,0 +1,12 @@
+# @package _global_
+exp_name: exp108
+notes: "wavelet model"
+
+defaults:
+  - override /feature_extractor: WaveletFeatureExtractor
+
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b3
+  encoder_weights: imagenet
+
