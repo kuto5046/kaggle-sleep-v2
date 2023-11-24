@@ -9,4 +9,3 @@ model:
   name: Spec2DCNN
   encoder_name: efficientnet-b3
   encoder_weights: imagenet
-

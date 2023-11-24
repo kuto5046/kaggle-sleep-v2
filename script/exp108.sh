@@ -1,0 +1,11 @@
+rye run python run/train.py +experiment=exp108 model.encoder_name=efficientnet-b0
+rye run python run/train.py +experiment=exp108 model.encoder_name=efficientnet-b1
+rye run python run/train.py +experiment=exp108 model.encoder_name=efficientnet-b2
+rye run python run/train.py +experiment=exp108 model.encoder_name=efficientnet-b3
+rye run python run/train.py +experiment=exp108 model.encoder_name=timm-efficientnet-b3
+rye run python run/train.py +experiment=exp108 model.encoder_name=mit_b0
+rye run python run/train.py +experiment=exp108 model.encoder_name=mit_b1
+rye run python run/train.py +experiment=exp108 model.encoder_name=mit_b2
+rye run python run/train.py +experiment=exp108 model.encoder_name=mit_b3
+rye run python run/train.py +experiment=exp108 model.encoder_name=timm-resnest50d
+rye run python run/train.py +experiment=exp108 model.encoder_name=resnet34
