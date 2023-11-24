@@ -1,0 +1,6 @@
+name: WaveletFeatureExtractor
+hop_length: ${downsample_rate}
+dj: 0.0625 # この値で出力も変化する。小さくすると解像度が上がり出力が大きくなる認識
+fmin: 20
+fmax: 320  # 320にすると64になる
+height: 64

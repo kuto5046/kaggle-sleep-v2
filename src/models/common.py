@@ -15,6 +15,7 @@ from src.models.feature_extractor.cnn import CNNSpectrogram
 from src.models.feature_extractor.lstm import LSTMFeatureExtractor
 from src.models.feature_extractor.panns import PANNsFeatureExtractor
 from src.models.feature_extractor.spectrogram import SpecFeatureExtractor
+from src.models.feature_extractor.wavelet import WaveletFeatureExtractor
 from src.models.spec1D import Spec1D
 from src.models.spec2Dcnn import Spec2DCNN
 
@@ -84,6 +85,16 @@ def get_feature_extractor(
             output_size=num_timesteps,
             conv=nn.Conv1d,
             reinit=cfg.feature_extractor.reinit,
+        )
+    elif cfg.feature_extractor.name == "WaveletFeatureExtractor":
+        feature_extractor = WaveletFeatureExtractor(
+            in_channels=feature_dim,
+            height=cfg.feature_extractor.height,
+            hop_length=cfg.feature_extractor.hop_length,
+            dj=cfg.feature_extractor.dj,
+            fmin=cfg.feature_extractor.fmin,
+            fmax=cfg.feature_extractor.fmax,
+            out_size=num_timesteps,
         )
     else:
         raise ValueError(f"Invalid feature extractor name: {cfg.feature_extractor.name}")
