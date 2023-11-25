@@ -154,6 +154,7 @@ python-slugify==8.0.1
 pytorch-lightning==2.0.9.post0
 pytorch-pfn-extras==0.7.3
 pytz==2023.3.post1
+pywavelets==1.5.0
 pyyaml==6.0.1
 pyzmq==25.1.1
 qtconsole==5.4.4
