@@ -1,4 +1,4 @@
-# rye run python run/train.py hydra.mode=MULTIRUN +experiment=exp110 split=fold_0,fold_1,fold_2,fold_3,fold_4
+rye run python run/train.py hydra.mode=MULTIRUN +experiment=exp110 split=fold_0,fold_1,fold_2,fold_3,fold_4
 
 # rye run python run/train.py +experiment=exp110 epoch=20 model.encoder_name=timm-efficientnet-b1
 # rye run python run/train.py +experiment=exp110 epoch=20 model.encoder_name=timm-efficientnet-b2
