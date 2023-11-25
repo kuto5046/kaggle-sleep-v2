@@ -7,11 +7,12 @@ defaults:
 
 model:
   name: Spec2DCNN
-  encoder_name: efficientnet-b1
+  encoder_name: timm-efficientnet-b2
   encoder_weights: imagenet
 
-duration: 17280
-downsample_rate: 6
+feature_extractor:
+  dj: 0.072
+  fmin: 20
+  fmax: 500
 
-# 過学習気味なので、epochは短め
-epoch: 20
+epoch: 50

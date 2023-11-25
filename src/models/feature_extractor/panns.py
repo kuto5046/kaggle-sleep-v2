@@ -87,7 +87,7 @@ class WaveletCNN1DFeatureExtractor(nn.Module):
             conv=conv,
             reinit=reinit,
         )
-        self.spec_feature_extractor = WaveletFeatureExtractor(
+        self.wavelet_feature_extractor = WaveletFeatureExtractor(
             in_channels=in_channels,
             height=self.cnn_feature_extractor.height,
             hop_length=stride,
@@ -110,7 +110,9 @@ class WaveletCNN1DFeatureExtractor(nn.Module):
         """
 
         cnn_img = self.cnn_feature_extractor(x)  # (batch_size, cnn_chans, height, time_steps)
-        spec_img = self.spec_feature_extractor(x)  # (batch_size, in_channels, height, time_steps)
+        spec_img = self.wavelet_feature_extractor(
+            x
+        )  # (batch_size, in_channels, height, time_steps)
 
         img = torch.cat([cnn_img, spec_img], dim=1)  # (batch_size, out_chans, height, time_steps)
 
