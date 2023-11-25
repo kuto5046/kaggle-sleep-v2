@@ -59,8 +59,16 @@ def main(cfg: DictConfig):  # type: ignore
     # init lightning model
     datamodule = SegDataModule(cfg)
     LOGGER.info("Set Up DataModule")
+    num_warmup_steps = int(
+        cfg.epoch * len(datamodule.train_dataloader()) * cfg.scheduler.warmup_step_rate
+    )
     model = SegModel(
-        cfg, datamodule.valid_event_df, len(cfg.features), len(cfg.labels), cfg.duration
+        cfg,
+        datamodule.valid_event_df,
+        len(cfg.features),
+        len(cfg.labels),
+        cfg.duration,
+        num_warmup_steps,
     )
 
     # set callbacks

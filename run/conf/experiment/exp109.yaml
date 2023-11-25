@@ -1,0 +1,20 @@
+# @package _global_
+exp_name: exp109
+notes: "wavelet model search duration"
+
+defaults:
+  - override /feature_extractor: WaveletFeatureExtractor
+
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b1
+  encoder_weights: imagenet
+
+duration: 17280
+downsample_rate: 6
+
+scheduler:
+  warmup_step_rate: 0.2
+
+decoder:
+  dropout: 0.5

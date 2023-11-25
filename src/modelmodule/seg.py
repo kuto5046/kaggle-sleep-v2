@@ -24,6 +24,7 @@ class SegModel(LightningModule):
         feature_dim: int,
         num_classes: int,
         duration: int,
+        num_warmup_steps: int,
     ):
         super().__init__()
         self.cfg = cfg
@@ -36,6 +37,7 @@ class SegModel(LightningModule):
             num_timesteps=num_timesteps // cfg.downsample_rate,
         )
         self.duration = duration
+        self.num_warmpup_steps = num_warmup_steps
         self.validation_step_outputs: list = []
         self.__best_score = 0
 
@@ -137,6 +139,8 @@ class SegModel(LightningModule):
     def configure_optimizers(self):
         optimizer = optim.AdamW(self.parameters(), lr=self.cfg.optimizer.lr)
         scheduler = get_cosine_schedule_with_warmup(
-            optimizer, num_training_steps=self.trainer.max_steps, **self.cfg.scheduler
+            optimizer,
+            num_training_steps=self.trainer.max_steps,
+            num_warmup_steps=self.num_warmpup_steps,
         )
         return [optimizer], [{"scheduler": scheduler, "interval": "step"}]

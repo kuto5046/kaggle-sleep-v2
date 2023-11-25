@@ -87,4 +87,4 @@ optimizer:
 
 # scheduler
 scheduler:
-  num_warmup_steps: 0
+  warmup_step_rate: 0
