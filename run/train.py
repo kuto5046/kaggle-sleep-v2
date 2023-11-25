@@ -134,6 +134,7 @@ def main(cfg: DictConfig):  # type: ignore
             feature_dim=len(cfg.features),
             num_classes=len(cfg.labels),
             duration=cfg.duration,
+            num_warmup_steps=num_warmup_steps,
         )
 
     evaluate(cfg)

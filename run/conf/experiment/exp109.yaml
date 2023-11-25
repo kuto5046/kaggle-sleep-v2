@@ -13,8 +13,5 @@ model:
 duration: 17280
 downsample_rate: 6
 
-scheduler:
-  warmup_step_rate: 0.2
-
-decoder:
-  dropout: 0.5
+# 過学習気味なので、epochは短め
+epoch: 20
