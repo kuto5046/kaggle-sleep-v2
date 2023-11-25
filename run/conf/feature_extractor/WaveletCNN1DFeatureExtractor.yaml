@@ -1,0 +1,14 @@
+name: WaveletCNN1DFeatureExtractor
+base_filters: 64
+kernel_sizes:
+  - 32
+  - 16
+  - ${downsample_rate}
+stride: ${downsample_rate}
+sigmoid: true
+reinit: true
+dj: 0.0625 # この値で出力も変化する。小さくすると解像度が上がり出力が大きくなる認識
+fmin: 20
+fmax: 320  # 320にすると64になる
+height: 64
+

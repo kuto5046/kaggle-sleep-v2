@@ -1,0 +1,17 @@
+# @package _global_
+exp_name: exp110
+notes: "wavelet and cnn1d stack feature extractor"
+
+defaults:
+  - override /feature_extractor: WaveletCNN1DFeatureExtractor
+
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b1
+  encoder_weights: imagenet
+
+duration: 17280
+downsample_rate: 6
+
+# 過学習気味なので、epochは短め
+epoch: 20
