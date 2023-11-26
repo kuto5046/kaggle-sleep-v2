@@ -1,0 +1,22 @@
+# @package _global_
+exp_name: exp111
+notes: "wavelet feature extractor"
+
+defaults:
+  - override /feature_extractor: WaveletFeatureExtractor
+
+model:
+  name: Spec2DCNN
+  encoder_name: resnet18  # 過学習しないように小さなモデルを利用
+  encoder_weights: imagenet
+
+
+duration: 17280
+downsample_rate: 6
+
+feature_extractor:
+  dj: 0.072
+  fmin: 20
+  fmax: 500
+
+epoch: 50
