@@ -1,6 +1,6 @@
 # @package _global_
-exp_name: exp111
-notes: "wavelet feature extractor search decoder"
+exp_name: exp113
+notes: "warmup rate"
 
 defaults:
   - override /feature_extractor: WaveletFeatureExtractor
@@ -21,3 +21,6 @@ feature_extractor:
   fmax: 500
 
 epoch: 50
+
+scheduler:
+  warmup_step_rate: 0.1
