@@ -1,6 +1,6 @@
 # @package _global_
 exp_name: exp111
-notes: "wavelet feature extractor"
+notes: "wavelet feature extractor search decoder"
 
 defaults:
   - override /feature_extractor: WaveletFeatureExtractor
