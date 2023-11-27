@@ -1,0 +1,26 @@
+# @package _global_
+exp_name: exp117
+notes: "hidden_size小さくしてencoder強くする"
+
+defaults:
+  - override /feature_extractor: WaveletFeatureExtractor
+  - override /decoder: LSTMDecoder
+
+model:
+  name: Spec2DCNN
+  encoder_name: resnet18  # 過学習しないように小さなモデルを利用
+  encoder_weights: imagenet
+
+
+duration: 17280
+downsample_rate: 4
+
+decoder:
+  hidden_size: 32
+# augmentation:
+#   cutmix_prob: 0.5
+
+feature_extractor:
+  dj: 0.072
+  fmin: 20
+  fmax: 500
