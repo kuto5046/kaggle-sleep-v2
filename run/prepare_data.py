@@ -20,16 +20,16 @@ SERIES_SCHEMA = {
 FEATURE_NAMES = [
     "anglez",
     "enmo",
-    "anglez_diff",
-    "enmo_diff",
+    # "anglez_diff",
+    # "enmo_diff",
     "hour_sin",
     "hour_cos",
-    "month_sin",
-    "month_cos",
-    "minute_sin",
-    "minute_cos",
-    "anglez_yesterday",
-    "enmo_yesterday",
+    # "month_sin",
+    # "month_cos",
+    # "minute_sin",
+    # "minute_cos",
+    # "anglez_yesterday",
+    # "enmo_yesterday",
     # "anglez_smoothed_avg_12",
     # "anglez_smoothed_max_12",
     # "anglez_smoothed_min_12",
@@ -75,12 +75,11 @@ def add_feature(series_df: pl.DataFrame) -> pl.DataFrame:
         *to_coord(pl.col("timestamp").dt.hour(), 24, "hour"),
         *to_coord(pl.col("timestamp").dt.month(), 12, "month"),
         *to_coord(pl.col("timestamp").dt.minute(), 60, "minute"),
-        pl.col('anglez').diff().fill_null(0).alias('anglez_diff'),
-        pl.col('enmo').diff().fill_null(0).alias('enmo_diff'),
+        pl.col("anglez").diff().fill_null(0).alias("anglez_diff"),
+        pl.col("enmo").diff().fill_null(0).alias("enmo_diff"),
         # 前日の全く同じ時間のanglezとenmoをshiftして特徴量にする
-        pl.col('anglez').shift(12*60*24).fill_null(0).alias('anglez_yesterday'),
-        pl.col('enmo').shift(12*60*24).fill_null(0).alias('enmo_yesterday'),
-
+        pl.col("anglez").shift(12 * 60 * 24).fill_null(0).alias("anglez_yesterday"),
+        pl.col("enmo").shift(12 * 60 * 24).fill_null(0).alias("enmo_yesterday"),
     )
     series_df = series_df.select("series_id", *FEATURE_NAMES)
     return series_df
