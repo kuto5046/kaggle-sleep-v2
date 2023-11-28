@@ -1,6 +1,6 @@
 # @package _global_
 exp_name: exp121
-notes: "dice loss"
+notes: "exp118 dice loss"
 
 defaults:
   - override /model: Spec1D

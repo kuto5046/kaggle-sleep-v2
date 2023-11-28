@@ -1,0 +1,21 @@
+# @package _global_
+defaults:
+  - override /model: Spec1D
+  - override /decoder: CNN1DLSTMDecoder
+exp_name: exp124
+notes: "exp088 dice loss"
+epoch: 50
+duration: 17280
+downsample_rate: 4
+
+imbalanced_loss_weight: 1
+
+feature_extractor:
+  kernel_sizes:
+    - 128
+    - 64
+    - 32
+    - 16
+    - 8
+    - 4
+    - 2

@@ -1,0 +1,7 @@
+# @package _global_
+exp_name: exp122
+notes: "exp098 diceloss"
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b3
+  encoder_weights: imagenet
