@@ -5,7 +5,6 @@ import torch.nn as nn
 
 from src.augmentation.cutmix import Cutmix
 from src.augmentation.mixup import Mixup
-from src.utils.criterions import DiceLoss
 from src.utils.criterions import ImbalancedL1Loss
 
 
@@ -26,7 +25,8 @@ class Spec1D(nn.Module):
         self.cutmix = Cutmix(cutmix_alpha)
         self.loss_fn1 = nn.BCEWithLogitsLoss()
         self.loss_fn2 = ImbalancedL1Loss(imbalanced_loss_weight)
-        self.loss_fn3 = DiceLoss()
+        # self.loss_fn3 = DiceLoss()
+        # self.loss_fn3 = BoundaryLoss(idc=[1])
 
     def forward(
         self,
@@ -62,7 +62,7 @@ class Spec1D(nn.Module):
             loss2 = self.loss_fn2(
                 logits[:, :, 0].sigmoid().diff(dim=1), labels[:, :, 0].diff(dim=1)
             )
-            loss3 = self.loss_fn3(logits.sigmoid(), labels)
-            output["loss"] = loss1 + loss2 + loss3
+            # loss3 = self.loss_fn3(logits.sigmoid(), labels)
+            output["loss"] = loss1 + loss2  # + loss3
 
         return output
