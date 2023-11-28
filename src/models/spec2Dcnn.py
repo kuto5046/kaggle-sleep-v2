@@ -36,6 +36,7 @@ class Spec2DCNN(nn.Module):
         self.loss_fn1 = nn.BCEWithLogitsLoss()
         self.loss_fn2 = ImbalancedL1Loss(imbalanced_loss_weight)
         self.loss_fn3 = DiceLoss()
+        # self.loss_fn3 = BoundaryLoss()
 
     def forward(
         self,
@@ -68,7 +69,7 @@ class Spec2DCNN(nn.Module):
             loss2 = self.loss_fn2(
                 logits[:, :, 0].sigmoid().diff(dim=1), labels[:, :, 0].diff(dim=1)
             )
-            # loss3 = self.loss_fn3(logits[:, :, 0], labels[:, :, 0])
-            output["loss"] = loss1 + loss2  # + loss3
+            loss3 = self.loss_fn3(logits.sigmoid(), labels)
+            output["loss"] = loss1 + loss2 + loss3
 
         return output
