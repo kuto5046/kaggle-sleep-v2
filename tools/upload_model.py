@@ -15,9 +15,11 @@ TARGET_EXP_NAMES = [
     # "exp083",
     # "exp085",
     "exp088",
-    "exp090",
+    # "exp090",
     "exp098",
-    "exp109",
+    # "exp109",
+    "exp111",
+    "exp118",
 ]
 
 
@@ -60,7 +62,7 @@ def copy_files_with_exts(source_dir: Path, dest_dir: Path, exts: list):
         ".hydra/*.yaml",
         "keys.npy",
         "preds.npy",
-        "labels.npy",
+        # "labels.npy",
     ],
 )
 @click.option("--user_name", "-u", default="kuto0633")
