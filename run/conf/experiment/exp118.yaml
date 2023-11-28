@@ -1,0 +1,26 @@
+# @package _global_
+exp_name: exp118
+notes: "wavelet and cnn1d lstm"
+
+defaults:
+  - override /model: Spec1D
+  - override /feature_extractor: WaveletCNN1DFeatureExtractor
+  - override /decoder: CNN1DLSTMDecoder
+
+duration: 17280
+downsample_rate: 4
+
+feature_extractor:
+  dj: 0.072
+  fmin: 20
+  fmax: 500
+
+feature_extractor:
+  kernel_sizes:
+    - 128
+    - 64
+    - 32
+    - 16
+    - 8
+    - 4
+    - 2
