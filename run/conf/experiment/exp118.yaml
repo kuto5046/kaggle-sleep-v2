@@ -9,18 +9,3 @@ defaults:
 
 duration: 17280
 downsample_rate: 4
-
-feature_extractor:
-  dj: 0.072
-  fmin: 20
-  fmax: 500
-
-feature_extractor:
-  kernel_sizes:
-    - 128
-    - 64
-    - 32
-    - 16
-    - 8
-    - 4
-    - 2
