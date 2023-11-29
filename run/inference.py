@@ -16,7 +16,6 @@ from src.datamodule.seg import load_chunk_features
 from src.datamodule.seg import nearest_valid_size
 from src.models.common import get_model
 from src.utils.common import trace
-from src.utils.post_process import post_process_asleep_to_event
 from src.utils.post_process import post_process_for_seg
 from src.utils.post_process import post_process_for_sliding_data
 
@@ -144,9 +143,9 @@ def main(cfg: DictConfig):
         )
         # sleep予測値をevent予測値に変換し混ぜる
         # event_weight=1.0(default)の場合はeventのみの予測となる
-        preds = post_process_asleep_to_event(
-            preds, keys, cfg.post_process.window_size, cfg.post_process.event_weight
-        )
+        # preds = post_process_asleep_to_event(
+        #     preds, keys, cfg.post_process.window_size, cfg.post_process.event_weight
+        # )
         np.save("keys.npy", np.array(keys))
         np.save("preds.npy", preds)
 
