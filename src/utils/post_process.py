@@ -7,7 +7,7 @@ from scipy.signal import find_peaks
 from src.utils.common import pad_if_needed
 
 
-def low_path_filter(wave: np.ndarray, hour: int, fe: int = 60, n: int = 3):
+def low_pass_filter(wave: np.ndarray, hour: int, fe: int = 60, n: int = 3):
     fs = 12 * 60 * hour
     nyq = fs / 2.0
     b, a = signal.butter(1, fe / nyq, btype="low")
@@ -43,7 +43,7 @@ def post_process_for_seg(
 
         for i, event_name in enumerate(["onset", "wakeup"]):
             this_event_preds = this_series_preds[:, i]
-            this_event_preds = low_path_filter(this_event_preds, hour=low_pass_filter_hour)
+            this_event_preds = low_pass_filter(this_event_preds, hour=low_pass_filter_hour)
             steps = find_peaks(this_event_preds, height=score_th, distance=distance)[0]
             scores = this_event_preds[steps]
 
@@ -200,7 +200,7 @@ def post_process_for_asleep(
 
         for i, event_name in enumerate(["onset", "wakeup"]):
             this_event_preds = this_series_preds[:, i]
-            this_event_preds = low_path_filter(this_event_preds, hour=low_pass_filter_hour)
+            this_event_preds = low_pass_filter(this_event_preds, hour=low_pass_filter_hour)
             steps = find_peaks(this_event_preds, height=score_th, distance=distance)[0]
             scores = this_event_preds[steps]
 
@@ -273,7 +273,7 @@ def post_process_for_asleep_and_event(
             )
             for i, event_name in enumerate(["onset", "wakeup"]):
                 this_event_preds = this_series_preds[:, i]
-                this_event_preds = low_path_filter(this_event_preds, hour=low_pass_filter_hour)
+                this_event_preds = low_pass_filter(this_event_preds, hour=low_pass_filter_hour)
                 steps = find_peaks(this_event_preds, height=score_th, distance=distance)[0]
                 scores = this_event_preds[steps]
 

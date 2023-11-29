@@ -20,10 +20,12 @@ SERIES_SCHEMA = {
 FEATURE_NAMES = [
     "anglez",
     "enmo",
+    "step",
     # "anglez_diff",
     # "enmo_diff",
     "hour_sin",
     "hour_cos",
+    "duplicate",
     # "month_sin",
     # "month_cos",
     # "minute_sin",
@@ -70,7 +72,44 @@ def to_coord(x: pl.Expr, max_: int, name: str) -> list[pl.Expr]:
     return [x_sin.alias(f"{name}_sin"), x_cos.alias(f"{name}_cos")]
 
 
+def add_duplicate(df: pl.DataFrame):
+    # NumPy配列への変換
+    array = df[["enmo", "anglez"]].to_numpy()
+
+    # 180行ごとに分割
+    subsets = [array[i : i + 180] for i in range(0, len(array), 180)]
+
+    subsets_dict = {}
+    for i, subset in enumerate(subsets):
+        # サブセットをタプルのリストに変換
+        subset_key = tuple(map(tuple, subset))
+        if subset_key in subsets_dict:
+            subsets_dict[subset_key].append(i)
+        else:
+            subsets_dict[subset_key] = [i]
+
+    # 完全に一致するサブセットのインデックスペアを探す
+    matching_subsets = []
+    for indices in subsets_dict.values():
+        if len(indices) > 1:
+            matching_subsets.extend(indices)
+
+    duplicate_array = np.zeros(len(df), dtype=int)
+
+    # matching_subsetsに含まれるサブセットに対応する配列の範囲を1に更新
+    for index in matching_subsets:
+        if np.mean(subsets[index][:, 0]) == 0:
+            continue
+        start_row = index * 180
+        end_row = start_row + 180
+        duplicate_array[start_row:end_row] = 1
+
+    df = df.with_columns(pl.Series(duplicate_array).alias("duplicate"))
+    return df
+
+
 def add_feature(series_df: pl.DataFrame) -> pl.DataFrame:
+    series_df = add_duplicate(series_df)
     series_df = series_df.with_columns(
         *to_coord(pl.col("timestamp").dt.hour(), 24, "hour"),
         *to_coord(pl.col("timestamp").dt.month(), 12, "month"),
@@ -124,7 +163,15 @@ def main(cfg: DictConfig):
                 (pl.col("anglez") - ANGLEZ_MEAN) / ANGLEZ_STD,
                 (pl.col("enmo") - ENMO_MEAN) / ENMO_STD,
             )
-            .select([pl.col("series_id"), pl.col("anglez"), pl.col("enmo"), pl.col("timestamp")])
+            .select(
+                [
+                    pl.col("series_id"),
+                    pl.col("step"),
+                    pl.col("anglez"),
+                    pl.col("enmo"),
+                    pl.col("timestamp"),
+                ]
+            )
             .collect(streaming=True)
             .sort(by=["series_id", "timestamp"])
         )
