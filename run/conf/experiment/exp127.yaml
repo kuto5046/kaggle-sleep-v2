@@ -20,4 +20,11 @@ feature_extractor:
   fmin: 20
   fmax: 500
 
-epoch: 50
+
+
+features:
+  - "anglez"
+  - "enmo"
+  - "hour_sin"
+  - "hour_cos"
+  - "duplicate"
