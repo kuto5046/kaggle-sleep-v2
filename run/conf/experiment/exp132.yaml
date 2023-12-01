@@ -1,0 +1,25 @@
+# @package _global_
+exp_name: exp132
+notes: "2phase learning from exp126"
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b3
+  encoder_weights: imagenet
+  pretrained_path: ${dir.model_dir}/exp126/run0/best_model.pth
+
+epoch: 10
+
+offset: 15
+sigma: 15
+bg_sampling_rate: 0.5
+
+augmentation:
+  swap_event_prob: 0.0
+
+
+features:
+  - "anglez"
+  - "enmo"
+  - "hour_sin"
+  - "hour_cos"
+  - "duplicate"

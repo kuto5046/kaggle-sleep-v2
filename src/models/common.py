@@ -1,5 +1,6 @@
 from typing import Union
 
+import torch
 import torch.nn as nn
 from omegaconf import DictConfig
 
@@ -218,5 +219,13 @@ def get_model(cfg: DictConfig, feature_dim: int, n_classes: int, num_timesteps: 
         )
     else:
         raise NotImplementedError
+
+    if cfg.model.pretrained_path is not None:
+        model.load_state_dict(torch.load(cfg.model.pretrained_path))
+        # decoder以外のパラメータを固定
+        # for param in model.feature_extractor.parameters():
+        #     param.requires_grad = False
+        # for param in model.encoder.parameters():
+        #     param.requires_grad = False
 
     return model
