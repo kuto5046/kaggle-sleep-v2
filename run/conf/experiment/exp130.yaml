@@ -1,0 +1,25 @@
+# @package _global_
+exp_name: exp130
+notes: "exp125 add duplicate label and feature"
+
+defaults:
+  - override /model: Spec1D
+  - override /feature_extractor: WaveletCNN1DFeatureExtractor
+  - override /decoder: CNN1DLSTMDecoder
+
+duration: 17280
+downsample_rate: 4
+
+
+labels:
+  - "awake"
+  - "event_onset"
+  - "event_wakeup"
+  - "duplicate"
+
+features:
+  - "anglez"
+  - "enmo"
+  - "hour_sin"
+  - "hour_cos"
+  - "duplicate"

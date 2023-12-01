@@ -1,0 +1,16 @@
+# @package _global_
+exp_name: exp128
+notes: "exp126 tta"
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b3
+  encoder_weights: imagenet
+
+slide_tta: true
+
+features:
+  - "anglez"
+  - "enmo"
+  - "hour_sin"
+  - "hour_cos"
+  - "duplicate"

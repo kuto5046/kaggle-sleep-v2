@@ -1,0 +1,20 @@
+# @package _global_
+exp_name: exp131
+notes: "exp126 duplicate label"
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b3
+  encoder_weights: imagenet
+
+labels:
+  - "awake"
+  - "event_onset"
+  - "event_wakeup"
+  - "duplicate"
+
+features:
+  - "anglez"
+  - "enmo"
+  - "hour_sin"
+  - "hour_cos"
+  - "duplicate"
