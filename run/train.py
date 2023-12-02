@@ -6,7 +6,6 @@ import hydra
 import numpy as np
 import pandas as pd
 import polars as pl
-import torch
 import wandb
 from omegaconf import DictConfig
 from pytorch_lightning import Trainer
@@ -138,9 +137,9 @@ def main(cfg: DictConfig):  # type: ignore
         )
 
     evaluate(cfg)
-    weights_path = str("model_weights.pth")  # type: ignore
-    LOGGER.info(f"Extracting and saving best weights: {weights_path}")
-    torch.save(model.model.state_dict(), weights_path)
+    # weights_path = str("model_weights.pth")  # type: ignore
+    # LOGGER.info(f"Extracting and saving best weights: {weights_path}")
+    # torch.save(model.model.state_dict(), weights_path)
     return
 
 
