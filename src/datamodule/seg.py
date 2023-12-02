@@ -135,6 +135,31 @@ def gaussian_label(label: np.ndarray, offset: int, sigma: int) -> np.ndarray:
     return label
 
 
+def laplace_kernel(length: int, scale: int = 3) -> np.ndarray:
+    x = np.ogrid[-length : length + 1]
+    h = np.exp(-abs(x) / scale)
+    h[h < np.finfo(h.dtype).eps * h.max()] = 0
+    return h
+
+
+def laplace_label(label: np.ndarray, offset: int, scale: int) -> np.ndarray:
+    num_events = label.shape[1]
+    for i in range(num_events):
+        label[:, i] = np.convolve(label[:, i], laplace_kernel(offset, scale), mode="same")
+
+    return label
+
+
+def add_soft_label(label, cfg):
+    if cfg.label_type == "gaussian":
+        label[:, [1, 2]] = gaussian_label(label[:, [1, 2]], offset=cfg.offset, sigma=cfg.sigma)
+    elif cfg.label_type == "laplace":
+        label[:, [1, 2]] = laplace_label(label[:, [1, 2]], offset=cfg.offset, scale=cfg.scale)
+    else:
+        raise NotImplementedError
+    return label
+
+
 def negative_sampling(this_event_df: pd.DataFrame, num_steps: int) -> int:
     """negative sampling
 
@@ -185,6 +210,23 @@ def event_relabeling(gt_df: pl.DataFrame, cfg: DictConfig) -> pl.DataFrame:
     return relabeled_gt_df
 
 
+def add_noisy_event_flag(gt_df: pl.DataFrame) -> pl.DataFrame:
+    """
+    ノイジーなラベルにフラグをつけて後ほどソフトラベルにする
+    """
+    relabeled_events = pl.read_csv(
+        "/home/kuto/kaggle/kaggle-sleep-v2/data/child-mind-institute-detect-sleep-states/relabeled_train_events.csv"
+    )
+    relabeled_gt_df = gt_df.join(relabeled_events, on=["series_id", "step", "event"], how="left")
+    relabeled_gt_df = relabeled_gt_df.with_columns(
+        pl.when(pl.col("relabeled_step").is_null())
+        .then(pl.lit(0))
+        .otherwise(pl.lit(1))
+        .alias("is_noisy_event"),
+    ).select(["series_id", "night", "event", "step", "timestamp", "is_noisy_event"])
+    return relabeled_gt_df
+
+
 class TrainDataset(Dataset):
     def __init__(
         self,
@@ -196,6 +238,8 @@ class TrainDataset(Dataset):
         # trainのみrelabelingしてvalidの評価は元のラベルを使う
         if cfg.relabeling:
             event_df = event_relabeling(event_df, cfg)
+        if cfg.use_noisy_event_label:
+            event_df = add_noisy_event_flag(event_df)
         self.event_df: pd.DataFrame = (
             event_df.pivot(index=["series_id", "night"], columns="event", values="step")
             .drop_nulls()
@@ -245,9 +289,7 @@ class TrainDataset(Dataset):
 
         # from hard label to gaussian label
         label = get_label(this_event_df, num_frames, self.cfg.duration, start, end)
-        label[:, [1, 2]] = gaussian_label(
-            label[:, [1, 2]], offset=self.cfg.offset, sigma=self.cfg.sigma
-        )
+        label = add_soft_label(label, self.cfg)
 
         if random.random() < self.cfg.augmentation.swap_event_prob:
             # 同一series_idの同一eventからランダムに1箇所をサンプリング
@@ -257,9 +299,7 @@ class TrainDataset(Dataset):
             swap_label = get_label(
                 this_event_df, num_frames, self.cfg.duration, swap_start, swap_end
             )
-            swap_label[:, [1, 2]] = gaussian_label(
-                swap_label[:, [1, 2]], offset=self.cfg.offset, sigma=self.cfg.sigma
-            )
+            swap_label = add_soft_label(swap_label, self.cfg)
             feature = self.swap_event_aug(feature, label, swap_feature, swap_label, event)
 
         if random.random() < self.cfg.augmentation.swap_mixup_prob:
@@ -270,9 +310,7 @@ class TrainDataset(Dataset):
             swap_label = get_label(
                 this_event_df, num_frames, self.cfg.duration, swap_start, swap_end
             )
-            swap_label[:, [1, 2]] = gaussian_label(
-                swap_label[:, [1, 2]], offset=self.cfg.offset, sigma=self.cfg.sigma
-            )
+            swap_label = add_soft_label(swap_label, self.cfg)
             feature = self.swap_mixup(feature, label, swap_feature, swap_label, event)
         # upsample
         feature = torch.FloatTensor(feature.T).unsqueeze(0)  # (1, num_features, duration)

@@ -42,9 +42,12 @@ imbalanced_loss_weight: 1
 
 # Dataset
 offset: 10
-sigma: 10
+sigma: 10  # for gaussian label
+scale: 10  # for laplace label
 bg_sampling_rate: 0.5
 slide_tta: false
+label_type: gaussian  # or laplace
+use_noisy_event_label: false
 
 # augmentation
 augmentation:
