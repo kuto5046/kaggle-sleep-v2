@@ -1,0 +1,21 @@
+# @package _global_
+exp_name: exp133
+notes: "label design on 2phase"
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b3
+  encoder_weights: imagenet
+  pretrained_path: ${dir.model_dir}/exp126/run0/best_model.pth
+
+epoch: 10
+
+augmentation:
+  swap_event_prob: 0.0
+
+
+features:
+  - "anglez"
+  - "enmo"
+  - "hour_sin"
+  - "hour_cos"
+  - "duplicate"
