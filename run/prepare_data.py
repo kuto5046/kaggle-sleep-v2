@@ -64,6 +64,10 @@ ANGLEZ_MEAN = -8.810476
 ANGLEZ_STD = 35.521877
 ENMO_MEAN = 0.041315
 ENMO_STD = 0.101829
+DUPLICATE_LENGTH_MEAN = 30.610896
+DUPLICATE_LENGTH_STD = 111.852321
+DUPLICATE_NEAREST_MEAN = 42.321609
+DUPLICATE_NEAREST_STD = 134.247448
 
 
 def to_coord(x: pl.Expr, max_: int, name: str) -> list[pl.Expr]:
@@ -132,6 +136,10 @@ def add_duplicate(df: pl.DataFrame):
         duplicate_array_len[start_row:end_row] = matching_subsets_len[index]
         duplicate_array_nearest[start_row:end_row] = matching_subsets_nearest[index]
 
+    duplicate_array_len = (duplicate_array_len - DUPLICATE_LENGTH_MEAN) / DUPLICATE_LENGTH_STD
+    duplicate_array_nearest = (
+        duplicate_array_nearest - DUPLICATE_NEAREST_MEAN
+    ) / DUPLICATE_NEAREST_STD
     df = df.with_columns(pl.Series(duplicate_array).alias("duplicate"))
     df = df.with_columns(pl.Series(duplicate_array_len).alias("duplicate_len"))
     df = df.with_columns(pl.Series(duplicate_array_nearest).alias("duplicate_nearest"))
