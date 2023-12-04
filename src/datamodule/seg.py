@@ -238,8 +238,8 @@ class TrainDataset(Dataset):
         # trainのみrelabelingしてvalidの評価は元のラベルを使う
         if cfg.relabeling:
             event_df = event_relabeling(event_df, cfg)
-        if cfg.use_noisy_event_label:
-            event_df = add_noisy_event_flag(event_df)
+        # if cfg.use_noisy_event_label:
+        #     event_df = add_noisy_event_flag(event_df)
         self.event_df: pd.DataFrame = (
             event_df.pivot(index=["series_id", "night"], columns="event", values="step")
             .drop_nulls()

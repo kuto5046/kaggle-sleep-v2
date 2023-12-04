@@ -26,6 +26,8 @@ FEATURE_NAMES = [
     "hour_sin",
     "hour_cos",
     "duplicate",
+    "duplicate_len",
+    "duplicate_nearest",
     # "month_sin",
     # "month_cos",
     # "minute_sin",
@@ -72,6 +74,24 @@ def to_coord(x: pl.Expr, max_: int, name: str) -> list[pl.Expr]:
     return [x_sin.alias(f"{name}_sin"), x_cos.alias(f"{name}_cos")]
 
 
+def duplicate_feature(indices):
+    nearest_distances = []
+    for i in range(len(indices)):
+        current_element = indices[i]
+        # 他の要素との距離を格納する一時的なリスト
+        distances = []
+        for j in range(len(indices)):
+            if i != j:
+                # 絶対距離を計算してリストに追加
+                distance = abs(current_element - indices[j])
+                distances.append(distance)
+        # 最小の距離を見つけてリストに追加
+        nearest_distance = min(distances)
+        nearest_distances.append(nearest_distance)
+    length = len(indices)
+    return nearest_distances, length
+
+
 def add_duplicate(df: pl.DataFrame):
     # NumPy配列への変換
     array = df[["enmo", "anglez"]].to_numpy()
@@ -89,22 +109,32 @@ def add_duplicate(df: pl.DataFrame):
             subsets_dict[subset_key] = [i]
 
     # 完全に一致するサブセットのインデックスペアを探す
-    matching_subsets = []
+    matching_subsets_len = {}
+    matching_subsets_nearest = {}
     for indices in subsets_dict.values():
         if len(indices) > 1:
-            matching_subsets.extend(indices)
+            nearest_distances, length = duplicate_feature(indices)
+            for j, idx in enumerate(indices):
+                matching_subsets_nearest[idx] = nearest_distances[j]
+                matching_subsets_len[idx] = length
 
     duplicate_array = np.zeros(len(df), dtype=int)
+    duplicate_array_len = np.zeros(len(df), dtype=int)
+    duplicate_array_nearest = np.zeros(len(df), dtype=int)
 
     # matching_subsetsに含まれるサブセットに対応する配列の範囲を1に更新
-    for index in matching_subsets:
+    for index in matching_subsets_len.keys():
         if np.mean(subsets[index][:, 0]) == 0:
             continue
         start_row = index * 180
         end_row = start_row + 180
         duplicate_array[start_row:end_row] = 1
+        duplicate_array_len[start_row:end_row] = matching_subsets_len[index]
+        duplicate_array_nearest[start_row:end_row] = matching_subsets_nearest[index]
 
     df = df.with_columns(pl.Series(duplicate_array).alias("duplicate"))
+    df = df.with_columns(pl.Series(duplicate_array_len).alias("duplicate_len"))
+    df = df.with_columns(pl.Series(duplicate_array_nearest).alias("duplicate_nearest"))
     return df
 
 

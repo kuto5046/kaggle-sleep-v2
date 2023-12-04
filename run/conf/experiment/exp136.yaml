@@ -1,0 +1,16 @@
+# @package _global_
+exp_name: exp136
+notes: "exp126 with some duplicate features"
+model:
+  name: Spec2DCNN
+  encoder_name: efficientnet-b3
+  encoder_weights: imagenet
+
+features:
+  - "anglez"
+  - "enmo"
+  - "hour_sin"
+  - "hour_cos"
+  - "duplicate"
+  - "duplicate_len"
+  - "duplicate_nearest"

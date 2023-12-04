@@ -1,0 +1,22 @@
+# @package _global_
+exp_name: exp134
+notes: "exp125 with laplace label"
+
+defaults:
+  - override /model: Spec1D
+  - override /feature_extractor: WaveletCNN1DFeatureExtractor
+  - override /decoder: CNN1DLSTMDecoder
+
+duration: 17280
+downsample_rate: 4
+
+label_type: laplace
+offset: 10 
+scale: 10
+
+features:
+  - "anglez"
+  - "enmo"
+  - "hour_sin"
+  - "hour_cos"
+  - "duplicate"
