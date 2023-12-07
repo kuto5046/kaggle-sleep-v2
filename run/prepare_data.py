@@ -26,8 +26,8 @@ FEATURE_NAMES = [
     "hour_sin",
     "hour_cos",
     "duplicate",
-    "duplicate_len",
-    "duplicate_nearest",
+    # "duplicate_len",
+    # "duplicate_nearest",
     # "month_sin",
     # "month_cos",
     # "minute_sin",
@@ -123,8 +123,8 @@ def add_duplicate(df: pl.DataFrame):
                 matching_subsets_len[idx] = length
 
     duplicate_array = np.zeros(len(df), dtype=int)
-    duplicate_array_len = np.zeros(len(df), dtype=int)
-    duplicate_array_nearest = np.zeros(len(df), dtype=int)
+    # duplicate_array_len = np.zeros(len(df), dtype=int)
+    # duplicate_array_nearest = np.zeros(len(df), dtype=int)
 
     # matching_subsetsに含まれるサブセットに対応する配列の範囲を1に更新
     for index in matching_subsets_len.keys():
@@ -133,8 +133,8 @@ def add_duplicate(df: pl.DataFrame):
         start_row = index * 180
         end_row = start_row + 180
         duplicate_array[start_row:end_row] = 1
-        duplicate_array_len[start_row:end_row] = matching_subsets_len[index]
-        duplicate_array_nearest[start_row:end_row] = matching_subsets_nearest[index]
+        # duplicate_array_len[start_row:end_row] = matching_subsets_len[index]
+        # duplicate_array_nearest[start_row:end_row] = matching_subsets_nearest[index]
 
     duplicate_array_len = (duplicate_array_len - DUPLICATE_LENGTH_MEAN) / DUPLICATE_LENGTH_STD
     duplicate_array_nearest = (
